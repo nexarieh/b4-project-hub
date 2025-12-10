@@ -16,13 +16,12 @@
 | **Timeline** | [Project Timeline](https://getnexar.atlassian.net/jira/software/c/projects/FS/boards/268/timeline?statuses=2%2C4&timeline=MONTHS) |
 | **Releases** | [JIRA Releases](https://getnexar.atlassian.net/projects/FS?selectedItem=com.atlassian.jira.jira-projects-plugin%3Arelease-page&status=no-filter) |
 | **Release Plan** | [Confluence](https://getnexar.atlassian.net/wiki/spaces/EMB/pages/4832722963) |
-| **JIRA Internal** | [FS Board](https://getnexar.atlassian.net/jira/software/c/projects/FS/boards/268/backlog) |
+| **JIRA Internal** | [FS Board](https://getnexar.atlassian.net/jira/software/c/projects/FS/boards/268/backlog) · [BR Bugs](https://getnexar.atlassian.net/jira/software/c/projects/BR/boards/287/backlog?issueParent=109691) |
 | **JIRA External** | [B4 (Chicony)](https://nexar-chicony.atlassian.net/jira/core/projects/B4/board?filter=&groupBy=status) · [DAS (Dastic)](https://nexar-chicony.atlassian.net/jira/core/projects/DAS/board?filter=&groupBy=status) |
-| **BR Bugs** | [Beam4 Bugs](https://getnexar.atlassian.net/jira/software/c/projects/BR/boards/287/backlog?issueParent=109691) |
 | **Sprint Planning** | [WW49 Planning](https://getnexar.atlassian.net/wiki/spaces/EMB/pages/5111021619) |
 | **Serial Numbers** | [FT Tracking Sheet](https://docs.google.com/spreadsheets/d/1ZAwoMznI-whqYJFvrwy9SrFTTNGQiMq62E_86qvR_sw/edit?gid=243956152#gid=243956152) |
 | **ODM Export** | [Google Drive](https://drive.google.com/drive/folders/1lFlqGslitGcLlwvC3xXvD4WrOqcWQ6Fh) |
-| **Slack** | [#eng-beam4k](https://app.slack.com/client/T02KEL8KX/C0824FCA2GM) |
+| **Slack** | [#eng-beam4k](https://app.slack.com/client/T02KEL8KX/C0824FCA2GM) · [#general-beam4k](https://app.slack.com/client/T02KEL8KX/C08M9J1S9CG) |
 | **Jenkins** | [B4 Builds](https://ci.nexar.cloud/job/Firmware/job/build-nexar-chicony/job/b4hw-fw2/) |
 
 ---
