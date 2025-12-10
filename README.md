@@ -28,7 +28,7 @@ Open http://localhost:8081
 **Phase:** Field Test 3 / MVP Development
 **Blocker:** PVT sign-off waiting on Chicony samples
 
-## Top Priorities (WW51)
+## Top 5 Priorities (WW51)
 
 | # | Priority | Ticket |
 |---|----------|--------|
@@ -36,6 +36,7 @@ Open http://localhost:8081
 | 2 | MVP: Remote stream bugs | FS-3375 |
 | 3 | MVP: Encryption | FS-3283 |
 | 4 | MVP: HTTP Server "teepee" | FS-2677 |
+| 5 | Integrate new Logstore | TBD |
 
 ## Agent Folders
 

@@ -1,5 +1,5 @@
 {
-  "updated": "2025-12-11T01:33:30.477406",
+  "updated": "2025-12-11T01:34:45.947000",
   "project": {
     "name": "Beam4K (B4)",
     "phase": "Field Test 3 / MVP Development",
@@ -78,6 +78,10 @@
     {
       "title": "MVP: HTTP Server \"Teepee\"",
       "ticket": "FS-2677"
+    },
+    {
+      "title": "Integrate new Logstore",
+      "ticket": "TBD"
     }
   ],
   "releases": [

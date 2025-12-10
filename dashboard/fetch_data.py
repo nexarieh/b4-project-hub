@@ -246,7 +246,8 @@ def main():
             {'title': 'FT Readiness: OBD issue', 'ticket': 'TBD'},
             {'title': 'MVP: Remote stream bugs', 'ticket': 'FS-3375'},
             {'title': 'MVP: Encryption', 'ticket': 'FS-3283'},
-            {'title': 'MVP: HTTP Server "Teepee"', 'ticket': 'FS-2677'}
+            {'title': 'MVP: HTTP Server "Teepee"', 'ticket': 'FS-2677'},
+            {'title': 'Integrate new Logstore', 'ticket': 'TBD'}
         ],
         'releases': releases,
         'bugs': bugs,
