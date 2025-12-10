@@ -264,6 +264,7 @@ def main():
             'release_plan': 'https://getnexar.atlassian.net/wiki/spaces/EMB/pages/4832722963',
             'jira_board': 'https://getnexar.atlassian.net/jira/software/c/projects/FS/boards/268/backlog',
             'chicony_jira': 'https://nexar-chicony.atlassian.net/jira/core/projects/B4/board?filter=&groupBy=status',
+            'dastic_jira': 'https://nexar-chicony.atlassian.net/jira/core/projects/DAS/board?filter=&groupBy=status',
             'br_bugs': 'https://getnexar.atlassian.net/jira/software/c/projects/BR/boards/287/backlog?issueParent=109691',
             'sprint_planning': f'https://getnexar.atlassian.net/wiki/spaces/EMB/pages/{sprint_id}',
             'sprint_title': sprint_title,
