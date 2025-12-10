@@ -164,6 +164,7 @@ def main():
             'br_bugs': 'https://getnexar.atlassian.net/jira/software/c/projects/BR/boards/287/backlog?issueParent=109691',
             'sprint_ww51': 'https://getnexar.atlassian.net/wiki/spaces/EMB/pages/5143494660',
             'serial_numbers': 'https://docs.google.com/spreadsheets/d/1ZAwoMznI-whqYJFvrwy9SrFTTNGQiMq62E_86qvR_sw/edit?gid=243956152#gid=243956152',
+            'odm_export': 'https://drive.google.com/drive/folders/1lFlqGslitGcLlwvC3xXvD4WrOqcWQ6Fh',
             'slack_eng': 'https://app.slack.com/client/T02KEL8KX/C0824FCA2GM'
         }
     }

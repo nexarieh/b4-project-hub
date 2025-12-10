@@ -18,6 +18,7 @@ Open http://localhost:8081
 | BR Bugs | [Beam4 Bugs](https://getnexar.atlassian.net/jira/software/c/projects/BR/boards/287/backlog?issueParent=109691) |
 | Sprint WW51 | [Planning Page](https://getnexar.atlassian.net/wiki/spaces/EMB/pages/5143494660) |
 | Serial Numbers | [FT Tracking Sheet](https://docs.google.com/spreadsheets/d/1ZAwoMznI-whqYJFvrwy9SrFTTNGQiMq62E_86qvR_sw/edit?gid=243956152#gid=243956152) |
+| ODM Export | [Google Drive](https://drive.google.com/drive/folders/1lFlqGslitGcLlwvC3xXvD4WrOqcWQ6Fh) |
 | #eng-beam4k | [Slack](https://app.slack.com/client/T02KEL8KX/C0824FCA2GM) |
 
 ## Current Status
