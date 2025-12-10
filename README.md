@@ -28,15 +28,14 @@ Open http://localhost:8081
 **Phase:** Field Test 3 / MVP Development
 **Blocker:** PVT sign-off waiting on Chicony samples
 
-## Top 5 Priorities (WW51)
+## Top Priorities (WW51)
 
 | # | Priority | Ticket |
 |---|----------|--------|
 | 1 | FT: OBD issue | TBD |
-| 2 | FT: Support HWK (MCU) | FS-3051 |
-| 3 | MVP: Remote stream bugs | FS-3375 |
-| 4 | MVP: Encryption | FS-3283 |
-| 5 | MVP: HTTP Server "teepee" | FS-2677 |
+| 2 | MVP: Remote stream bugs | FS-3375 |
+| 3 | MVP: Encryption | FS-3283 |
+| 4 | MVP: HTTP Server "teepee" | FS-2677 |
 
 ## Agent Folders
 

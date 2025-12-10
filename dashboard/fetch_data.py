@@ -234,11 +234,12 @@ def main():
             {'name': 'Field Test 3', 'status': 'in_progress', 'date': 'Dec 2024'},
             {'name': 'PVT sign-off', 'status': 'blocked', 'date': 'TBD'},
             {'name': 'MVP', 'status': 'in_progress', 'date': 'Q1 2025'},
-            {'name': 'Full Product', 'status': 'backlog', 'date': 'TBD'}
+            {'name': 'Full Product', 'status': 'backlog', 'date': 'TBD'},
+            {'name': '', 'status': 'empty', 'date': ''},
+            {'name': '', 'status': 'empty', 'date': ''}
         ],
         'priorities': [
             {'title': 'FT Readiness: OBD issue', 'ticket': 'TBD'},
-            {'title': 'FT Readiness: Support HWK (MCU)', 'ticket': 'FS-3051'},
             {'title': 'MVP: Remote stream bugs', 'ticket': 'FS-3375'},
             {'title': 'MVP: Encryption', 'ticket': 'FS-3283'},
             {'title': 'MVP: HTTP Server "Teepee"', 'ticket': 'FS-2677'}

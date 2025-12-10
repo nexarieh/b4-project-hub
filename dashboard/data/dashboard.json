@@ -1,5 +1,5 @@
 {
-  "updated": "2025-12-11T01:30:29.186741",
+  "updated": "2025-12-11T01:32:07.329559",
   "project": {
     "name": "Beam4K (B4)",
     "phase": "Field Test 3 / MVP Development",
@@ -50,16 +50,22 @@
       "name": "Full Product",
       "status": "backlog",
       "date": "TBD"
+    },
+    {
+      "name": "",
+      "status": "empty",
+      "date": ""
+    },
+    {
+      "name": "",
+      "status": "empty",
+      "date": ""
     }
   ],
   "priorities": [
     {
       "title": "FT Readiness: OBD issue",
       "ticket": "TBD"
-    },
-    {
-      "title": "FT Readiness: Support HWK (MCU)",
-      "ticket": "FS-3051"
     },
     {
       "title": "MVP: Remote stream bugs",

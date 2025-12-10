@@ -196,18 +196,16 @@
                     <!-- Milestones -->
                     <div class="card">
                         <h2>📍 Milestones</h2>
-                        <div class="scroll-table" style="max-height: 200px;">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Milestone</th>
-                                        <th>Status</th>
-                                        <th>Date</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="milestones">Loading...</tbody>
-                            </table>
-                        </div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Milestone</th>
+                                    <th>Status</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody id="milestones">Loading...</tbody>
+                        </table>
                     </div>
                 </div>
 
@@ -296,13 +294,17 @@
                 `${data.project.name} • ${data.project.phase}`;
 
             // Milestones (table)
-            const milestonesHtml = data.milestones.map(m => `
-                <tr>
+            const milestonesHtml = data.milestones.map(m => {
+                if (m.status === 'empty') {
+                    return '<tr style="height:28px;"><td></td><td></td><td></td></tr>';
+                }
+                const statusText = m.status === 'done' ? '✓ Done' : m.status === 'in_progress' ? '● Active' : m.status === 'blocked' ? '⊘ Blocked' : '○ Backlog';
+                return `<tr>
                     <td>${m.name}</td>
-                    <td><span class="status-badge status-${m.status}">${m.status === 'done' ? '✓ Done' : m.status === 'in_progress' ? '● In Progress' : m.status === 'blocked' ? '⊘ Blocked' : '○ Backlog'}</span></td>
+                    <td><span class="status-badge status-${m.status}">${statusText}</span></td>
                     <td>${m.date || '-'}</td>
-                </tr>
-            `).join('');
+                </tr>`;
+            }).join('');
             document.getElementById('milestones').innerHTML = milestonesHtml;
 
             // Metrics
