@@ -13,10 +13,15 @@
             padding: 20px;
             line-height: 1.5;
         }
-        .container { max-width: 1400px; margin: 0 auto; }
+        .container { max-width: 1600px; margin: 0 auto; }
         h1 { color: #58a6ff; margin-bottom: 5px; }
         .subtitle { color: #8b949e; margin-bottom: 20px; }
+        .main-layout { display: grid; grid-template-columns: 220px 1fr; gap: 20px; }
+        .sidebar { position: sticky; top: 20px; height: fit-content; }
+        .content-area { display: flex; flex-direction: column; gap: 20px; }
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 20px; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+        @media (max-width: 1200px) { .main-layout { grid-template-columns: 1fr; } .grid-3 { grid-template-columns: 1fr; } }
         .card {
             background: #161b22;
             border: 1px solid #30363d;
@@ -157,84 +162,92 @@
             <button id="refresh-btn" onclick="refreshData()">🔄 Refresh Data</button>
         </div>
 
-        <div class="grid">
-            <!-- Milestones -->
-            <div class="card">
-                <h2>📍 Milestones</h2>
-                <div class="milestone-list" id="milestones">Loading...</div>
-            </div>
-
-            <!-- Metrics -->
-            <div class="card">
-                <h2>📊 Metrics</h2>
-                <div class="metrics-grid" id="metrics">Loading...</div>
-            </div>
-
-            <!-- Releases -->
-            <div class="card full-width">
-                <h2>🚀 Releases</h2>
-                <div class="scroll-table" style="max-height: 200px;">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Version</th>
-                                <th>Status</th>
-                                <th>Release Date</th>
-                                <th>Description</th>
-                            </tr>
-                        </thead>
-                        <tbody id="releases-body">Loading...</tbody>
-                    </table>
+        <div class="main-layout">
+            <!-- Left Sidebar - Quick Links -->
+            <div class="sidebar">
+                <div class="card">
+                    <h2>🔗 Quick Links</h2>
+                    <div class="links-list" id="links">Loading...</div>
                 </div>
             </div>
 
-            <!-- Top Priorities -->
-            <div class="card">
-                <h2>🎯 Top 5 Priorities</h2>
-                <ul class="priority-list" id="priorities">Loading...</ul>
-            </div>
+            <!-- Main Content Area -->
+            <div class="content-area">
+                <!-- Top Row: Releases, Milestones, BR Bugs -->
+                <div class="grid-3">
+                    <!-- Releases -->
+                    <div class="card">
+                        <h2>🚀 Releases</h2>
+                        <div class="scroll-table" style="max-height: 200px;">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Version</th>
+                                        <th>Status</th>
+                                        <th>Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="releases-body">Loading...</tbody>
+                            </table>
+                        </div>
+                    </div>
 
-            <!-- Quick Links -->
-            <div class="card">
-                <h2>🔗 Quick Links</h2>
-                <div class="links-list" id="links">Loading...</div>
-            </div>
+                    <!-- Milestones -->
+                    <div class="card">
+                        <h2>📍 Milestones</h2>
+                        <div class="milestone-list" id="milestones">Loading...</div>
+                    </div>
 
-            <!-- Bugs -->
-            <div class="card full-width">
-                <h2>🐛 Open Bugs (BR Project)</h2>
-                <div class="scroll-table">
-                    <table id="bugs-table">
-                        <thead>
-                            <tr>
-                                <th>Key</th>
-                                <th>Summary</th>
-                                <th>Status</th>
-                                <th>Priority</th>
-                                <th>Assignee</th>
-                            </tr>
-                        </thead>
-                        <tbody id="bugs-body">Loading...</tbody>
-                    </table>
+                    <!-- Bugs -->
+                    <div class="card">
+                        <h2>🐛 BR Bugs</h2>
+                        <div class="scroll-table" style="max-height: 200px;">
+                            <table id="bugs-table">
+                                <thead>
+                                    <tr>
+                                        <th>Key</th>
+                                        <th>Summary</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="bugs-body">Loading...</tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
-            </div>
 
-            <!-- Tickets -->
-            <div class="card full-width">
-                <h2>📋 FS Tickets</h2>
-                <div class="scroll-table">
-                    <table id="tickets-table">
-                        <thead>
-                            <tr>
-                                <th>Key</th>
-                                <th>Summary</th>
-                                <th>Status</th>
-                                <th>Priority</th>
-                                <th>Assignee</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tickets-body">Loading...</tbody>
-                    </table>
+                <!-- Middle Row: Priorities + Metrics -->
+                <div class="grid">
+                    <!-- Top Priorities -->
+                    <div class="card">
+                        <h2>🎯 Top 5 Priorities</h2>
+                        <ul class="priority-list" id="priorities">Loading...</ul>
+                    </div>
+
+                    <!-- Metrics -->
+                    <div class="card">
+                        <h2>📊 Metrics</h2>
+                        <div class="metrics-grid" id="metrics">Loading...</div>
+                    </div>
+                </div>
+
+                <!-- Bottom: FS Tickets -->
+                <div class="card">
+                    <h2>📋 FS Tickets</h2>
+                    <div class="scroll-table">
+                        <table id="tickets-table">
+                            <thead>
+                                <tr>
+                                    <th>Key</th>
+                                    <th>Summary</th>
+                                    <th>Status</th>
+                                    <th>Priority</th>
+                                    <th>Assignee</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tickets-body">Loading...</tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -297,16 +310,15 @@
             `;
             document.getElementById('metrics').innerHTML = metricsHtml;
 
-            // Releases
+            // Releases (compact)
             const releasesHtml = (data.releases || []).map(r => `
                 <tr>
                     <td><a class="ticket-link" href="${r.url}" target="_blank">${r.name}</a></td>
-                    <td><span class="status-badge ${r.released ? 'status-done' : 'status-in_progress'}">${r.released ? 'Released' : 'Unreleased'}</span></td>
+                    <td><span class="status-badge ${r.released ? 'status-done' : 'status-in_progress'}">${r.released ? '✓' : '○'}</span></td>
                     <td>${r.releaseDate || '-'}</td>
-                    <td class="truncate">${r.description || ''}</td>
                 </tr>
             `).join('');
-            document.getElementById('releases-body').innerHTML = releasesHtml || '<tr><td colspan="4">No releases found</td></tr>';
+            document.getElementById('releases-body').innerHTML = releasesHtml || '<tr><td colspan="3">No releases</td></tr>';
 
             // Priorities
             const prioritiesHtml = data.priorities.map((p, i) => `
@@ -335,17 +347,15 @@
             `;
             document.getElementById('links').innerHTML = linksHtml;
 
-            // Bugs table
+            // Bugs table (compact)
             const bugsHtml = data.bugs.map(bug => `
                 <tr>
                     <td><a class="ticket-link" href="${bug.url}" target="_blank">${bug.key}</a></td>
                     <td class="truncate" title="${bug.summary}">${bug.summary}</td>
                     <td><span class="status-badge status-${bug.status.toLowerCase().replace(' ', '-')}">${bug.status}</span></td>
-                    <td>${bug.priority}</td>
-                    <td>${bug.assignee}</td>
                 </tr>
             `).join('');
-            document.getElementById('bugs-body').innerHTML = bugsHtml || '<tr><td colspan="5">No bugs found</td></tr>';
+            document.getElementById('bugs-body').innerHTML = bugsHtml || '<tr><td colspan="3">No bugs</td></tr>';
 
             // Tickets table
             const ticketsHtml = data.tickets.slice(0, 20).map(t => `
