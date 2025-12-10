@@ -8,30 +8,29 @@
 
 ## Quick Links
 
-### Confluence
+### Confluence / Jira
 | Resource | Link | Notes |
 |----------|------|-------|
-| B4 Product Spec | `[ADD LINK]` | |
-| FT (Field Test) Dashboard | `[ADD LINK]` | |
-| Release Planning | `[ADD LINK]` | |
+| Release Plan | [Release plan for Beam4k](https://getnexar.atlassian.net/wiki/spaces/EMB/pages/4832722963/Release+plan+for+Beam4k) | Main release planning doc |
+| Jira Backlog | [FS Board Backlog](https://getnexar.atlassian.net/jira/software/c/projects/FS/boards/268/backlog) | Sprint planning & backlog |
 
 ### GitHub Repos
-| Repo | Link | Notes |
-|------|------|-------|
-| B4 Firmware | `[ADD LINK]` | |
-| B4 Hardware | `[ADD LINK]` | |
+| Repo | Local Path | Notes |
+|------|------------|-------|
+| nexar-chicony | `~/Git-new/nexar-chicony` | Main B4 firmware/software repo |
+| nexar_n1 | `~/Git-new/nexar_n1` | N1 reference (for comparison) |
 
 ### Slack Channels
-| Channel | Link | Purpose |
-|---------|------|---------|
-| #b4-dev | `[ADD LINK]` | Main dev channel |
-| #b4-ft | `[ADD LINK]` | Field test updates |
+| Channel | Purpose |
+|---------|---------|
+| #eng-beam4k | Main engineering channel |
+| #general-beam4 | General B4 discussions |
+| #b4-hw | Hardware team |
 
 ### Other Tools
 | Tool | Link | Notes |
 |------|------|-------|
-| Jira Board | `[ADD LINK]` | |
-| Figma Designs | `[ADD LINK]` | |
+| `[ADD]` | | |
 
 ---
 
