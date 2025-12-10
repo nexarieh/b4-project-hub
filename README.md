@@ -46,14 +46,14 @@
 
 | Milestone | Status | Date |
 |-----------|--------|------|
-| DVT signoff | ![Done](https://img.shields.io/badge/Done-green) | 2024-Q3 |
-| PVT 0.5 | ![Done](https://img.shields.io/badge/Done-green) | 2024-Q4 |
-| PVT 1.0 | ![Done](https://img.shields.io/badge/Done-green) | 2024-Q4 |
-| Initial FT | ![Done](https://img.shields.io/badge/Done-green) | Oct 2024 |
-| Field Test 2 | ![Done](https://img.shields.io/badge/Done-green) | Nov 2024 |
-| Field Test 3 | ![Active](https://img.shields.io/badge/Active-blue) | Dec 2024 |
+| DVT signoff | ![Done](https://img.shields.io/badge/Done-green) | 2025-09-08 |
+| PVT 0.5 | ![Done](https://img.shields.io/badge/Done-green) | 2025-09-29 |
+| PVT 1.0 | ![Done](https://img.shields.io/badge/Done-green) | 2025-10-20 |
+| Initial FT | ![Done](https://img.shields.io/badge/Done-green) | 2025-11-17 |
+| Field Test 2 | ![Done](https://img.shields.io/badge/Done-green) | 2025-12-03 |
+| Field Test 3 | ![Active](https://img.shields.io/badge/Active-blue) | 2025-12-11 |
 | PVT sign-off | ![Blocked](https://img.shields.io/badge/Blocked-red) | TBD |
-| MVP | ![Active](https://img.shields.io/badge/Active-blue) | Q1 2025 |
+| MVP | ![Active](https://img.shields.io/badge/Active-blue) | 2026-01-02 |
 | Full Product | ![Backlog](https://img.shields.io/badge/Backlog-lightgrey) | TBD |
 
 ---

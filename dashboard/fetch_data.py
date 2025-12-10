@@ -230,14 +230,14 @@ def main():
             'blocker': 'PVT sign-off waiting on Chicony samples'
         },
         'milestones': [
-            {'name': 'DVT signoff', 'status': 'done', 'date': '2024-Q3'},
-            {'name': 'PVT 0.5', 'status': 'done', 'date': '2024-Q4'},
-            {'name': 'PVT 1.0', 'status': 'done', 'date': '2024-Q4'},
-            {'name': 'Initial FT', 'status': 'done', 'date': 'Oct 2024'},
-            {'name': 'Field Test 2', 'status': 'done', 'date': 'Nov 2024'},
-            {'name': 'Field Test 3', 'status': 'in_progress', 'date': 'Dec 2024'},
+            {'name': 'DVT signoff', 'status': 'done', 'date': '2025-09-08'},
+            {'name': 'PVT 0.5', 'status': 'done', 'date': '2025-09-29'},
+            {'name': 'PVT 1.0', 'status': 'done', 'date': '2025-10-20'},
+            {'name': 'Initial FT', 'status': 'done', 'date': '2025-11-17'},
+            {'name': 'Field Test 2', 'status': 'done', 'date': '2025-12-03'},
+            {'name': 'Field Test 3', 'status': 'in_progress', 'date': '2025-12-11'},
             {'name': 'PVT sign-off', 'status': 'blocked', 'date': 'TBD'},
-            {'name': 'MVP', 'status': 'in_progress', 'date': 'Q1 2025'},
+            {'name': 'MVP', 'status': 'in_progress', 'date': '2026-01-02'},
             {'name': 'Full Product', 'status': 'backlog', 'date': 'TBD'},
             {'name': '', 'status': 'empty', 'date': ''},
             {'name': '', 'status': 'empty', 'date': ''}
