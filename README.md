@@ -14,7 +14,6 @@
 | | Link |
 |---|------|
 | **Timeline** | [Project Timeline](https://getnexar.atlassian.net/jira/software/c/projects/FS/boards/268/timeline?statuses=2%2C4&timeline=MONTHS) |
-| **Releases** | [JIRA Releases](https://getnexar.atlassian.net/projects/FS?selectedItem=com.atlassian.jira.jira-projects-plugin%3Arelease-page&status=no-filter) |
 | **Release Plan** | [Confluence](https://getnexar.atlassian.net/wiki/spaces/EMB/pages/4832722963) |
 | **JIRA Internal** | [FS Board](https://getnexar.atlassian.net/jira/software/c/projects/FS/boards/268/backlog) · [BR Bugs](https://getnexar.atlassian.net/jira/software/c/projects/BR/boards/287/backlog?issueParent=109691) |
 | **JIRA External** | [B4 (Chicony)](https://nexar-chicony.atlassian.net/jira/core/projects/B4/board?filter=&groupBy=status) · [DAS (Dastic)](https://nexar-chicony.atlassian.net/jira/core/projects/DAS/board?filter=&groupBy=status) |
