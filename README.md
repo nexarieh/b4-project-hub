@@ -23,6 +23,7 @@
 | **Serial Numbers** | [FT Tracking Sheet](https://docs.google.com/spreadsheets/d/1ZAwoMznI-whqYJFvrwy9SrFTTNGQiMq62E_86qvR_sw/edit?gid=243956152#gid=243956152) |
 | **ODM Export** | [Google Drive](https://drive.google.com/drive/folders/1lFlqGslitGcLlwvC3xXvD4WrOqcWQ6Fh) |
 | **Slack** | [#eng-beam4k](https://app.slack.com/client/T02KEL8KX/C0824FCA2GM) |
+| **Jenkins** | [B4 Builds](https://ci.nexar.cloud/job/Firmware/job/build-nexar-chicony/job/b4hw-fw2/) |
 
 ---
 

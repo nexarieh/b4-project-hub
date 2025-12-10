@@ -269,7 +269,8 @@ def main():
             'sprint_title': sprint_title,
             'serial_numbers': 'https://docs.google.com/spreadsheets/d/1ZAwoMznI-whqYJFvrwy9SrFTTNGQiMq62E_86qvR_sw/edit?gid=243956152#gid=243956152',
             'odm_export': 'https://drive.google.com/drive/folders/1lFlqGslitGcLlwvC3xXvD4WrOqcWQ6Fh',
-            'slack_eng': 'https://app.slack.com/client/T02KEL8KX/C0824FCA2GM'
+            'slack_eng': 'https://app.slack.com/client/T02KEL8KX/C0824FCA2GM',
+            'jenkins': 'https://ci.nexar.cloud/job/Firmware/job/build-nexar-chicony/job/b4hw-fw2/'
         }
     }
 
