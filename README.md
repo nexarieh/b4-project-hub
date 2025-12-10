@@ -14,10 +14,10 @@ Open http://localhost:8081
 | Resource | Link |
 |----------|------|
 | Project Timeline | [JIRA Timeline](https://getnexar.atlassian.net/jira/software/c/projects/FS/boards/268/timeline?statuses=2%2C4&timeline=MONTHS) |
+| Releases | [JIRA Releases](https://getnexar.atlassian.net/projects/FS?selectedItem=com.atlassian.jira.jira-projects-plugin%3Arelease-page&status=no-filter) |
 | Release Plan | [Confluence](https://getnexar.atlassian.net/wiki/spaces/EMB/pages/4832722963) |
 | JIRA Board | [FS-268 Backlog](https://getnexar.atlassian.net/jira/software/c/projects/FS/boards/268/backlog) |
 | BR Bugs | [Beam4 Bugs](https://getnexar.atlassian.net/jira/software/c/projects/BR/boards/287/backlog?issueParent=109691) |
-| Sprint WW51 | [Planning Page](https://getnexar.atlassian.net/wiki/spaces/EMB/pages/5143494660) |
 | Serial Numbers | [FT Tracking Sheet](https://docs.google.com/spreadsheets/d/1ZAwoMznI-whqYJFvrwy9SrFTTNGQiMq62E_86qvR_sw/edit?gid=243956152#gid=243956152) |
 | ODM Export | [Google Drive](https://drive.google.com/drive/folders/1lFlqGslitGcLlwvC3xXvD4WrOqcWQ6Fh) |
 | #eng-beam4k | [Slack](https://app.slack.com/client/T02KEL8KX/C0824FCA2GM) |

@@ -94,8 +94,16 @@ def fetch_releases(auth):
                 'url': f"https://getnexar.atlassian.net/projects/FS/versions/{v.get('id')}"
             })
 
-    # Sort: unreleased first, then by date desc
-    releases.sort(key=lambda x: (x['released'], x.get('releaseDate', '') or ''), reverse=True)
+    # Sort by version number (highest first)
+    import re
+    def version_key(r):
+        # Extract version number like 7.4.60 from "fw2-b4-v7.4.60"
+        match = re.search(r'v?(\d+)\.(\d+)\.(\d+)', r['name'])
+        if match:
+            return (int(match.group(1)), int(match.group(2)), int(match.group(3)))
+        return (0, 0, 0)
+
+    releases.sort(key=version_key, reverse=True)
     return releases[:10]  # Last 10 releases
 
 
@@ -246,6 +254,7 @@ def main():
         },
         'links': {
             'timeline': 'https://getnexar.atlassian.net/jira/software/c/projects/FS/boards/268/timeline?statuses=2%2C4&timeline=MONTHS',
+            'releases_page': 'https://getnexar.atlassian.net/projects/FS?selectedItem=com.atlassian.jira.jira-projects-plugin%3Arelease-page&status=no-filter',
             'release_plan': 'https://getnexar.atlassian.net/wiki/spaces/EMB/pages/4832722963',
             'jira_board': 'https://getnexar.atlassian.net/jira/software/c/projects/FS/boards/268/backlog',
             'br_bugs': 'https://getnexar.atlassian.net/jira/software/c/projects/BR/boards/287/backlog?issueParent=109691',
