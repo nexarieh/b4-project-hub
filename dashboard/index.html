@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>B4 Project Dashboard</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0d1117;
+            color: #c9d1d9;
+            padding: 20px;
+            line-height: 1.5;
+        }
+        .container { max-width: 1400px; margin: 0 auto; }
+        h1 { color: #58a6ff; margin-bottom: 5px; }
+        .subtitle { color: #8b949e; margin-bottom: 20px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 20px; }
+        .card {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 16px;
+        }
+        .card h2 {
+            color: #58a6ff;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #30363d;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .status-done { background: #238636; color: #fff; }
+        .status-in_progress, .status-progress { background: #1f6feb; color: #fff; }
+        .status-blocked { background: #da3633; color: #fff; }
+        .status-backlog { background: #30363d; color: #8b949e; }
+        .status-new, .status-todo { background: #6e7681; color: #fff; }
+
+        .milestone-list { display: flex; flex-wrap: wrap; gap: 8px; }
+        .milestone-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            background: #21262d;
+            border-radius: 6px;
+            font-size: 13px;
+        }
+        .milestone-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+        .dot-done { background: #238636; }
+        .dot-in_progress { background: #1f6feb; }
+        .dot-blocked { background: #da3633; }
+        .dot-backlog { background: #484f58; }
+
+        .priority-list { list-style: none; }
+        .priority-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #21262d;
+        }
+        .priority-item:last-child { border-bottom: none; }
+        .priority-num {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 22px;
+            height: 22px;
+            background: #da3633;
+            color: #fff;
+            border-radius: 50%;
+            font-size: 12px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        .priority-ticket {
+            color: #58a6ff;
+            text-decoration: none;
+            font-family: monospace;
+        }
+        .priority-ticket:hover { text-decoration: underline; }
+
+        .metrics-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+        .metric-box {
+            background: #21262d;
+            padding: 12px;
+            border-radius: 6px;
+            text-align: center;
+        }
+        .metric-value { font-size: 28px; font-weight: bold; color: #58a6ff; }
+        .metric-label { font-size: 12px; color: #8b949e; }
+
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th { text-align: left; color: #8b949e; font-weight: 500; padding: 8px 6px; border-bottom: 1px solid #30363d; }
+        td { padding: 8px 6px; border-bottom: 1px solid #21262d; }
+        tr:hover { background: #21262d; }
+        .ticket-link { color: #58a6ff; text-decoration: none; font-family: monospace; }
+        .ticket-link:hover { text-decoration: underline; }
+        .truncate { max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+        .links-list a {
+            display: block;
+            color: #58a6ff;
+            text-decoration: none;
+            padding: 8px 0;
+            border-bottom: 1px solid #21262d;
+        }
+        .links-list a:hover { background: #21262d; margin: 0 -16px; padding: 8px 16px; }
+        .links-list a:last-child { border-bottom: none; }
+
+        .status-bar { display: flex; height: 8px; border-radius: 4px; overflow: hidden; margin-top: 8px; }
+        .status-segment { height: 100%; }
+
+        .updated { text-align: right; color: #484f58; font-size: 12px; margin-top: 20px; }
+        .error { color: #f85149; padding: 20px; text-align: center; }
+
+        .full-width { grid-column: 1 / -1; }
+        .scroll-table { max-height: 300px; overflow-y: auto; }
+
+        #refresh-btn {
+            background: #238636;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+        #refresh-btn:hover { background: #2ea043; }
+        #refresh-btn:disabled { background: #484f58; cursor: wait; }
+        #refresh-btn.loading { animation: pulse 1s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h1>🚗 B4 Project Dashboard</h1>
+                <p class="subtitle" id="project-phase">Loading...</p>
+            </div>
+            <button id="refresh-btn" onclick="refreshData()">🔄 Refresh Data</button>
+        </div>
+
+        <div class="grid">
+            <!-- Milestones -->
+            <div class="card">
+                <h2>📍 Milestones</h2>
+                <div class="milestone-list" id="milestones">Loading...</div>
+            </div>
+
+            <!-- Metrics -->
+            <div class="card">
+                <h2>📊 Metrics</h2>
+                <div class="metrics-grid" id="metrics">Loading...</div>
+            </div>
+
+            <!-- Top Priorities -->
+            <div class="card">
+                <h2>🎯 Top 5 Priorities</h2>
+                <ul class="priority-list" id="priorities">Loading...</ul>
+            </div>
+
+            <!-- Quick Links -->
+            <div class="card">
+                <h2>🔗 Quick Links</h2>
+                <div class="links-list" id="links">Loading...</div>
+            </div>
+
+            <!-- Bugs -->
+            <div class="card full-width">
+                <h2>🐛 Open Bugs (BR Project)</h2>
+                <div class="scroll-table">
+                    <table id="bugs-table">
+                        <thead>
+                            <tr>
+                                <th>Key</th>
+                                <th>Summary</th>
+                                <th>Status</th>
+                                <th>Priority</th>
+                                <th>Assignee</th>
+                            </tr>
+                        </thead>
+                        <tbody id="bugs-body">Loading...</tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tickets -->
+            <div class="card full-width">
+                <h2>📋 FS Tickets</h2>
+                <div class="scroll-table">
+                    <table id="tickets-table">
+                        <thead>
+                            <tr>
+                                <th>Key</th>
+                                <th>Summary</th>
+                                <th>Status</th>
+                                <th>Priority</th>
+                                <th>Assignee</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tickets-body">Loading...</tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <p class="updated" id="updated"></p>
+    </div>
+
+    <script>
+        async function loadDashboard() {
+            try {
+                const response = await fetch('data/dashboard.json?t=' + Date.now());
+                if (!response.ok) throw new Error('Data not found. Run: python3 fetch_data.py');
+                const data = await response.json();
+                renderDashboard(data);
+            } catch (error) {
+                document.querySelector('.grid').innerHTML = `
+                    <div class="card full-width">
+                        <div class="error">
+                            <h2>⚠️ Could not load data</h2>
+                            <p>${error.message}</p>
+                            <p style="margin-top: 10px; color: #8b949e;">Run: <code>python3 fetch_data.py</code> first</p>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function renderDashboard(data) {
+            // Project phase
+            document.getElementById('project-phase').textContent =
+                `${data.project.name} • ${data.project.phase}`;
+
+            // Milestones
+            const milestonesHtml = data.milestones.map(m => `
+                <div class="milestone-item">
+                    <div class="milestone-dot dot-${m.status}"></div>
+                    ${m.name}
+                </div>
+            `).join('');
+            document.getElementById('milestones').innerHTML = milestonesHtml;
+
+            // Metrics
+            const metricsHtml = `
+                <div class="metric-box">
+                    <div class="metric-value">${data.metrics.total_bugs}</div>
+                    <div class="metric-label">Open Bugs</div>
+                </div>
+                <div class="metric-box">
+                    <div class="metric-value">${data.metrics.total_tickets}</div>
+                    <div class="metric-label">FS Tickets</div>
+                </div>
+                <div class="metric-box">
+                    <div class="metric-value">${data.metrics.bug_status['In Progress'] || 0}</div>
+                    <div class="metric-label">Bugs In Progress</div>
+                </div>
+                <div class="metric-box">
+                    <div class="metric-value">${data.metrics.ticket_status['In Progress'] || 0}</div>
+                    <div class="metric-label">Tickets In Progress</div>
+                </div>
+            `;
+            document.getElementById('metrics').innerHTML = metricsHtml;
+
+            // Priorities
+            const prioritiesHtml = data.priorities.map((p, i) => `
+                <li class="priority-item">
+                    <span><span class="priority-num">${i + 1}</span>${p.title}</span>
+                    ${p.ticket !== 'TBD'
+                        ? `<a class="priority-ticket" href="https://getnexar.atlassian.net/browse/${p.ticket}" target="_blank">${p.ticket}</a>`
+                        : '<span style="color: #8b949e">TBD</span>'
+                    }
+                </li>
+            `).join('');
+            document.getElementById('priorities').innerHTML = prioritiesHtml;
+
+            // Links
+            const linksHtml = `
+                <a href="${data.links.release_plan}" target="_blank">📄 Release Plan (Confluence)</a>
+                <a href="${data.links.jira_board}" target="_blank">📋 JIRA Board (FS-268)</a>
+                <a href="${data.links.br_bugs}" target="_blank">🐛 BR Bugs Board (Beam4)</a>
+                <a href="${data.links.sprint_ww51}" target="_blank">🗓️ Sprint WW51 Planning</a>
+                <a href="${data.links.serial_numbers}" target="_blank">📊 Serial Numbers (FT Tracking)</a>
+                <a href="${data.links.slack_eng}" target="_blank">💬 #eng-beam4k Slack</a>
+            `;
+            document.getElementById('links').innerHTML = linksHtml;
+
+            // Bugs table
+            const bugsHtml = data.bugs.map(bug => `
+                <tr>
+                    <td><a class="ticket-link" href="${bug.url}" target="_blank">${bug.key}</a></td>
+                    <td class="truncate" title="${bug.summary}">${bug.summary}</td>
+                    <td><span class="status-badge status-${bug.status.toLowerCase().replace(' ', '-')}">${bug.status}</span></td>
+                    <td>${bug.priority}</td>
+                    <td>${bug.assignee}</td>
+                </tr>
+            `).join('');
+            document.getElementById('bugs-body').innerHTML = bugsHtml || '<tr><td colspan="5">No bugs found</td></tr>';
+
+            // Tickets table
+            const ticketsHtml = data.tickets.slice(0, 20).map(t => `
+                <tr>
+                    <td><a class="ticket-link" href="${t.url}" target="_blank">${t.key}</a></td>
+                    <td class="truncate" title="${t.summary}">${t.summary}</td>
+                    <td><span class="status-badge status-${t.status.toLowerCase().replace(' ', '-')}">${t.status}</span></td>
+                    <td>${t.priority}</td>
+                    <td>${t.assignee}</td>
+                </tr>
+            `).join('');
+            document.getElementById('tickets-body').innerHTML = ticketsHtml || '<tr><td colspan="5">No tickets found</td></tr>';
+
+            // Updated timestamp
+            const updated = new Date(data.updated);
+            document.getElementById('updated').textContent = `Last updated: ${updated.toLocaleString()}`;
+        }
+
+        async function refreshData() {
+            const btn = document.getElementById('refresh-btn');
+            btn.disabled = true;
+            btn.classList.add('loading');
+            btn.textContent = '⏳ Fetching...';
+
+            try {
+                // Call the fetch script via a cache-busting reload
+                await loadDashboard();
+                btn.textContent = '✅ Updated!';
+                setTimeout(() => {
+                    btn.textContent = '🔄 Refresh Data';
+                    btn.disabled = false;
+                    btn.classList.remove('loading');
+                }, 1500);
+            } catch (e) {
+                btn.textContent = '❌ Error';
+                setTimeout(() => {
+                    btn.textContent = '🔄 Refresh Data';
+                    btn.disabled = false;
+                    btn.classList.remove('loading');
+                }, 2000);
+            }
+        }
+
+        loadDashboard();
+        // Auto-refresh every 5 minutes
+        setInterval(loadDashboard, 300000);
+    </script>
+</body>
+</html>
