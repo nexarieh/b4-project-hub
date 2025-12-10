@@ -4,6 +4,9 @@
 
 This project uses the `mcp-atlassian` MCP server to access Confluence and Jira.
 
+> **Token Status**: Current token "claude-confluence" expires **Dec 14, 2025**.
+> Renew at: https://id.atlassian.com/manage-profile/security/api-tokens
+
 ### Prerequisites
 
 1. Install mcp-atlassian:

@@ -2,7 +2,7 @@
 
 > **Team Leader's Knowledge Base** - Nexar's next-generation 4K smart dashcam
 >
-> Last updated: 2025-12-10
+> Last updated: 2025-12-10 (Confluence synced)
 
 ---
 
@@ -36,26 +36,39 @@
 
 ## Project Status
 
-**Current Phase:** MVP Development / Early Field Testing
+**Current Phase:** Field Test 3 / MVP Development
 
 | Metric | Status | Notes |
 |--------|--------|-------|
-| MVP Readiness | `[X]%` | |
-| FT Units Deployed | `[N]` | |
-| Critical Blockers | `[N]` | See P0 below |
+| MVP Readiness | In Progress | MVP milestone active |
+| PVT Sign-off | BLOCKED | Waiting for PVT samples from Chicony |
+| Field Test 3 | QA | Sounds, Local stream, bug fixes |
 
 ---
 
 ## Priorities
 
 ### P0 - Critical (Address NOW)
-- [ ] `[Add critical items here]`
+- [ ] PVT sign-off blocked - need PVT samples from Chicony (FS-3185)
 
-### P1 - This Sprint
-- [ ] `[Add sprint items here]`
+### P1 - This Sprint (Field Test 3)
+- [ ] Sounds (FS-3272)
+- [ ] Local stream (FS-2990)
+- [ ] Bug fixes
 
-### P2 - Backlog
-- [ ] `[Add backlog items here]`
+### P2 - MVP Milestone
+- [ ] Remote streaming (FS-2494)
+- [ ] Manual clips (FS-3245)
+- [ ] Guardian mode (VX-2343)
+- [ ] Thumbnails for trimming (VX-2319)
+- [ ] All settings options
+- [ ] Acko assets support (sounds, logo)
+- [ ] Acko cloud env support
+
+### Backlog (Full Product)
+- [ ] Wifi offloading (FS-2493)
+- [ ] Vision Pipeline
+- [ ] Rear camera
 
 ---
 
@@ -63,10 +76,15 @@
 
 | Milestone | Target Date | Status | Notes |
 |-----------|-------------|--------|-------|
-| FT Phase 1 Start | `[DATE]` | In Progress | |
-| MVP Complete | `[DATE]` | Pending | |
-| FT Phase 2 | `[DATE]` | Pending | |
-| Production Release | `[DATE]` | Pending | |
+| DVT signoff | - | ✅ Done | Vanilla image, APIs, HW Validator, CV flow |
+| PVT 0.5 | - | ✅ Done | Linux image |
+| PVT 1.0 | - | ✅ Done | Partition A, LTE, SDK, nx_updater, Logstore, Lite SHM |
+| Initial Field Test | - | ✅ Done | Onboarding, Events, OTA, Recording, Connectivity, etc. |
+| Field Test 2 | - | ✅ Done | |
+| Field Test 3 | - | 🔵 QA | Sounds, Local stream |
+| PVT sign-off | TBD | 🔴 Blocked | Waiting for Chicony PVT samples |
+| MVP (Mass Production) | ??? | 🟡 In Progress | Remote streaming, clips, guardian mode, etc. |
+| Full Product | TBD | 📋 Backlog | Wifi offload, Vision, Rear cam |
 
 ---
 
@@ -107,6 +125,27 @@
 ## Session Notes
 
 > Running log of work sessions and insights. Newest first.
+
+### 2025-12-10 - Confluence Integration & Status Sync
+- **MCP Atlassian Setup Complete**: Fixed API token authentication
+  - Old token had issues (possibly corrupted)
+  - Created new token "claude-confluence" (expires Dec 14, 2025)
+  - Updated `~/.claude.json` with working credentials
+  - Both Confluence and Jira APIs now working
+- **Synced Release Plan from Confluence** (page ID: 4832722963, version 34)
+  - Current phase: Field Test 3 / MVP Development
+  - **Blocker**: PVT sign-off waiting on Chicony samples
+  - FT3 in QA: Sounds, Local stream
+  - MVP features in progress: Remote streaming, Manual clips, Guardian mode, Thumbnails, Acko support
+- **Key JIRA tickets identified**:
+  - FT3: FS-3272, FS-2990
+  - PVT sign-off: FS-3185
+  - MVP: FS-2494, FS-3245, VX-2343, VX-2319
+  - Full product: FS-2493
+- **Next session**:
+  - Pull detailed JIRA issue status
+  - Track FT3 QA progress
+  - Follow up on Chicony PVT samples blocker
 
 ### 2025-12-10 - Initial Setup
 - Created this knowledge base
