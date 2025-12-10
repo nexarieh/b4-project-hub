@@ -104,7 +104,7 @@ def fetch_releases(auth):
         return (0, 0, 0)
 
     releases.sort(key=version_key, reverse=True)
-    return releases[:10]  # Last 10 releases
+    return releases[:20]  # Last 20 releases
 
 
 def fetch_jira_issues(auth, jql, max_results=50):
