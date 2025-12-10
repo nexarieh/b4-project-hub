@@ -29,6 +29,47 @@ def get_credentials():
     }
 
 
+def fetch_latest_sprint_page(auth):
+    """Find the latest sprint planning page from Confluence."""
+    import re
+
+    # Use CQL search for sprint planning pages
+    url = 'https://getnexar.atlassian.net/wiki/rest/api/content/search'
+    params = {
+        'cql': 'space=EMB AND title~"Sprint" AND title~"Planning"',
+        'limit': 50
+    }
+
+    response = requests.get(url, auth=auth, params=params)
+    if response.status_code != 200:
+        return None, None
+
+    pages = response.json().get('results', [])
+
+    # Filter for sprint planning pages (pattern: "DD/MM/YYYY - Sprint X WWnn Planning")
+    sprint_pages = []
+    for page in pages:
+        title = page.get('title', '')
+        # Match pattern like "15/12/2025 - Sprint Y WW51 Planning"
+        match = re.search(r'WW(\d+)', title)
+        if match:
+            ww_num = int(match.group(1))
+            sprint_pages.append({
+                'id': page['id'],
+                'title': title,
+                'ww': ww_num
+            })
+
+    if not sprint_pages:
+        return None, None
+
+    # Sort by WW number descending and get the latest
+    sprint_pages.sort(key=lambda x: x['ww'], reverse=True)
+    latest = sprint_pages[0]
+
+    return latest['id'], latest['title']
+
+
 def fetch_jira_issues(auth, jql, max_results=50):
     """Fetch issues from JIRA."""
     url = 'https://getnexar.atlassian.net/rest/api/3/search/jql'
@@ -120,6 +161,16 @@ def main():
     tickets = fetch_fs_tickets(auth)
     print(f"  Found {len(tickets)} tickets")
 
+    # Fetch latest sprint planning page
+    print("Finding latest sprint planning page...")
+    sprint_id, sprint_title = fetch_latest_sprint_page(auth)
+    if sprint_id:
+        print(f"  Found: {sprint_title}")
+    else:
+        sprint_id = "5143494660"  # Fallback to WW51
+        sprint_title = "Sprint Planning"
+        print("  Using fallback")
+
     # Calculate metrics
     status_counts = get_status_counts(tickets)
     bug_counts = get_status_counts(bugs)
@@ -162,7 +213,8 @@ def main():
             'release_plan': 'https://getnexar.atlassian.net/wiki/spaces/EMB/pages/4832722963',
             'jira_board': 'https://getnexar.atlassian.net/jira/software/c/projects/FS/boards/268/backlog',
             'br_bugs': 'https://getnexar.atlassian.net/jira/software/c/projects/BR/boards/287/backlog?issueParent=109691',
-            'sprint_ww51': 'https://getnexar.atlassian.net/wiki/spaces/EMB/pages/5143494660',
+            'sprint_planning': f'https://getnexar.atlassian.net/wiki/spaces/EMB/pages/{sprint_id}',
+            'sprint_title': sprint_title,
             'serial_numbers': 'https://docs.google.com/spreadsheets/d/1ZAwoMznI-whqYJFvrwy9SrFTTNGQiMq62E_86qvR_sw/edit?gid=243956152#gid=243956152',
             'odm_export': 'https://drive.google.com/drive/folders/1lFlqGslitGcLlwvC3xXvD4WrOqcWQ6Fh',
             'slack_eng': 'https://app.slack.com/client/T02KEL8KX/C0824FCA2GM'
