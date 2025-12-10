@@ -70,6 +70,35 @@ def fetch_latest_sprint_page(auth):
     return latest['id'], latest['title']
 
 
+def fetch_releases(auth):
+    """Fetch releases from JIRA FS project."""
+    url = 'https://getnexar.atlassian.net/rest/api/3/project/FS/versions'
+    response = requests.get(url, auth=auth)
+
+    if response.status_code != 200:
+        return []
+
+    versions = response.json()
+
+    # Filter for B4/Beam4 releases and sort by release date desc
+    releases = []
+    for v in versions:
+        name = v.get('name', '')
+        # Include B4/Beam4 versions or recent fw2-b4 versions
+        if 'b4' in name.lower() or 'beam4' in name.lower():
+            releases.append({
+                'name': name,
+                'released': v.get('released', False),
+                'releaseDate': v.get('releaseDate', ''),
+                'description': v.get('description', '')[:50] if v.get('description') else '',
+                'url': f"https://getnexar.atlassian.net/projects/FS/versions/{v.get('id')}"
+            })
+
+    # Sort: unreleased first, then by date desc
+    releases.sort(key=lambda x: (x['released'], x.get('releaseDate', '') or ''), reverse=True)
+    return releases[:10]  # Last 10 releases
+
+
 def fetch_jira_issues(auth, jql, max_results=50):
     """Fetch issues from JIRA."""
     url = 'https://getnexar.atlassian.net/rest/api/3/search/jql'
@@ -171,6 +200,11 @@ def main():
         sprint_title = "Sprint Planning"
         print("  Using fallback")
 
+    # Fetch releases
+    print("Fetching B4 releases...")
+    releases = fetch_releases(auth)
+    print(f"  Found {len(releases)} releases")
+
     # Calculate metrics
     status_counts = get_status_counts(tickets)
     bug_counts = get_status_counts(bugs)
@@ -201,6 +235,7 @@ def main():
             {'title': 'MVP: Encryption', 'ticket': 'FS-3283'},
             {'title': 'MVP: HTTP Server "Teepee"', 'ticket': 'FS-2677'}
         ],
+        'releases': releases,
         'bugs': bugs,
         'tickets': tickets,
         'metrics': {

@@ -170,6 +170,24 @@
                 <div class="metrics-grid" id="metrics">Loading...</div>
             </div>
 
+            <!-- Releases -->
+            <div class="card full-width">
+                <h2>🚀 Releases</h2>
+                <div class="scroll-table" style="max-height: 200px;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Version</th>
+                                <th>Status</th>
+                                <th>Release Date</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody id="releases-body">Loading...</tbody>
+                    </table>
+                </div>
+            </div>
+
             <!-- Top Priorities -->
             <div class="card">
                 <h2>🎯 Top 5 Priorities</h2>
@@ -278,6 +296,17 @@
                 </div>
             `;
             document.getElementById('metrics').innerHTML = metricsHtml;
+
+            // Releases
+            const releasesHtml = (data.releases || []).map(r => `
+                <tr>
+                    <td><a class="ticket-link" href="${r.url}" target="_blank">${r.name}</a></td>
+                    <td><span class="status-badge ${r.released ? 'status-done' : 'status-in_progress'}">${r.released ? 'Released' : 'Unreleased'}</span></td>
+                    <td>${r.releaseDate || '-'}</td>
+                    <td class="truncate">${r.description || ''}</td>
+                </tr>
+            `).join('');
+            document.getElementById('releases-body').innerHTML = releasesHtml || '<tr><td colspan="4">No releases found</td></tr>';
 
             // Priorities
             const prioritiesHtml = data.priorities.map((p, i) => `

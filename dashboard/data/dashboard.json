@@ -1,5 +1,5 @@
 {
-  "updated": "2025-12-11T01:19:30.266616",
+  "updated": "2025-12-11T01:20:55.677378",
   "project": {
     "name": "Beam4K (B4)",
     "phase": "Field Test 3 / MVP Development",
@@ -63,6 +63,78 @@
     {
       "title": "MVP: HTTP Server \"Teepee\"",
       "ticket": "FS-2677"
+    }
+  ],
+  "releases": [
+    {
+      "name": "fw2-b4-v7.4.53 (FT-3)",
+      "released": true,
+      "releaseDate": "2025-12-07",
+      "description": "Initial MVP version",
+      "url": "https://getnexar.atlassian.net/projects/FS/versions/18849"
+    },
+    {
+      "name": "fw2-b4-v7.4.51",
+      "released": true,
+      "releaseDate": "2025-11-24",
+      "description": "",
+      "url": "https://getnexar.atlassian.net/projects/FS/versions/19212"
+    },
+    {
+      "name": "fw2-b4-v7.4.50 (FT-2)",
+      "released": true,
+      "releaseDate": "2025-11-20",
+      "description": "Complete Phases 1 & 2 Epics",
+      "url": "https://getnexar.atlassian.net/projects/FS/versions/17958"
+    },
+    {
+      "name": "fw2-b4-v7.3.51 (FT-1)",
+      "released": true,
+      "releaseDate": "2025-11-11",
+      "description": "FT version (patch)",
+      "url": "https://getnexar.atlassian.net/projects/FS/versions/18882"
+    },
+    {
+      "name": "fw2-b4-v7.3.50",
+      "released": true,
+      "releaseDate": "2025-11-10",
+      "description": "FT version (partition B) - Basic functionalities",
+      "url": "https://getnexar.atlassian.net/projects/FS/versions/18057"
+    },
+    {
+      "name": "fw2-b4-v1.0.2",
+      "released": true,
+      "releaseDate": "2025-10-29",
+      "description": "PVT 1.0 Patch",
+      "url": "https://getnexar.atlassian.net/projects/FS/versions/18717"
+    },
+    {
+      "name": "fw2-b4-v1.0.1",
+      "released": true,
+      "releaseDate": "2025-10-20",
+      "description": "Fix version update",
+      "url": "https://getnexar.atlassian.net/projects/FS/versions/18519"
+    },
+    {
+      "name": "fw2-b4-1.0.0",
+      "released": true,
+      "releaseDate": "2025-10-19",
+      "description": "Minimal version for PVT (Partition A):\n1. Connecti",
+      "url": "https://getnexar.atlassian.net/projects/FS/versions/16869"
+    },
+    {
+      "name": "B4 DVT sign-off",
+      "released": true,
+      "releaseDate": "2025-10-02",
+      "description": "",
+      "url": "https://getnexar.atlassian.net/projects/FS/versions/16209"
+    },
+    {
+      "name": "fw2-b4-v7.4.60 (MVP1)",
+      "released": false,
+      "releaseDate": "2025-12-15",
+      "description": "",
+      "url": "https://getnexar.atlassian.net/projects/FS/versions/19311"
     }
   ],
   "bugs": [
