@@ -1,5 +1,5 @@
 {
-  "updated": "2025-12-11T01:32:35.899169",
+  "updated": "2025-12-11T01:33:30.477406",
   "project": {
     "name": "Beam4K (B4)",
     "phase": "Field Test 3 / MVP Development",
@@ -150,6 +150,13 @@
       "releaseDate": "2025-10-02",
       "description": "",
       "url": "https://getnexar.atlassian.net/projects/FS/versions/16209"
+    },
+    {
+      "name": "",
+      "released": null,
+      "releaseDate": "",
+      "description": "",
+      "url": "#"
     }
   ],
   "bugs": [

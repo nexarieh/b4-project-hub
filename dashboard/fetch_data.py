@@ -104,7 +104,11 @@ def fetch_releases(auth):
         return (0, 0, 0)
 
     releases.sort(key=version_key, reverse=True)
-    return releases[:20]  # Last 20 releases
+    # Match milestone count (11 rows)
+    result = releases[:11]
+    while len(result) < 11:
+        result.append({'name': '', 'released': None, 'releaseDate': '', 'description': '', 'url': '#'})
+    return result
 
 
 def fetch_jira_issues(auth, jql, max_results=50):
