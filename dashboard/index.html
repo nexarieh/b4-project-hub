@@ -126,6 +126,30 @@
         .links-list a:hover { background: #21262d; margin: 0 -16px; padding: 8px 16px; }
         .links-list a:last-child { border-bottom: none; }
 
+        .links-list .dropdown { position: relative; border-bottom: 1px solid #21262d; }
+        .links-list .dropdown-toggle {
+            display: block;
+            color: #58a6ff;
+            text-decoration: none;
+            padding: 8px 0;
+            cursor: pointer;
+        }
+        .links-list .dropdown-toggle:hover { background: #21262d; margin: 0 -16px; padding: 8px 16px; }
+        .links-list .dropdown-menu {
+            display: none;
+            padding-left: 16px;
+            background: #21262d;
+            margin: 0 -16px;
+            padding: 4px 16px 8px;
+        }
+        .links-list .dropdown.open .dropdown-menu { display: block; }
+        .links-list .dropdown-menu a {
+            padding: 6px 0;
+            font-size: 13px;
+            border-bottom: none;
+        }
+        .links-list .dropdown-menu a:hover { background: #30363d; margin: 0 -8px; padding: 6px 8px; border-radius: 4px; }
+
         .status-bar { display: flex; height: 8px; border-radius: 4px; overflow: hidden; margin-top: 8px; }
         .status-segment { height: 100%; }
 
@@ -359,9 +383,14 @@
                 <a href="${data.links.timeline}" target="_blank" style="background:#238636;color:#fff;padding:8px 12px;border-radius:6px;font-weight:500;">📅 Project Timeline</a>
                 <a href="${data.links.releases_page}" target="_blank">🚀 Releases (JIRA)</a>
                 <a href="${data.links.release_plan}" target="_blank">📄 Release Plan (Confluence)</a>
-                <a href="${data.links.jira_board}" target="_blank">📋 JIRA Board (FS-268)</a>
-                <a href="${data.links.chicony_jira}" target="_blank">🏭 Chicony JIRA (External)</a>
-                <a href="${data.links.dastic_jira}" target="_blank">🏭 Dastic JIRA (External)</a>
+                <a href="${data.links.jira_board}" target="_blank">📋 JIRA Internal (FS)</a>
+                <div class="dropdown">
+                    <a href="#" class="dropdown-toggle" onclick="event.preventDefault(); this.parentElement.classList.toggle('open')">🏭 JIRA External ▾</a>
+                    <div class="dropdown-menu">
+                        <a href="${data.links.chicony_jira}" target="_blank">B4 (Chicony)</a>
+                        <a href="${data.links.dastic_jira}" target="_blank">DAS (Dastic)</a>
+                    </div>
+                </div>
                 <a href="${data.links.br_bugs}" target="_blank">🐛 BR Bugs Board (Beam4)</a>
                 <a href="${data.links.sprint_planning}" target="_blank">🗓️ ${data.links.sprint_title || 'Sprint Planning'}</a>
                 <a href="${data.links.serial_numbers}" target="_blank">📊 Serial Numbers (FT Tracking)</a>
