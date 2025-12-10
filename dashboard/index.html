@@ -196,7 +196,18 @@
                     <!-- Milestones -->
                     <div class="card">
                         <h2>📍 Milestones</h2>
-                        <div class="milestone-list" id="milestones">Loading...</div>
+                        <div class="scroll-table" style="max-height: 200px;">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Milestone</th>
+                                        <th>Status</th>
+                                        <th>Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="milestones">Loading...</tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
 
@@ -284,12 +295,13 @@
             document.getElementById('project-phase').textContent =
                 `${data.project.name} • ${data.project.phase}`;
 
-            // Milestones
+            // Milestones (table)
             const milestonesHtml = data.milestones.map(m => `
-                <div class="milestone-item">
-                    <div class="milestone-dot dot-${m.status}"></div>
-                    ${m.name}
-                </div>
+                <tr>
+                    <td>${m.name}</td>
+                    <td><span class="status-badge status-${m.status}">${m.status === 'done' ? '✓ Done' : m.status === 'in_progress' ? '● In Progress' : m.status === 'blocked' ? '⊘ Blocked' : '○ Backlog'}</span></td>
+                    <td>${m.date || '-'}</td>
+                </tr>
             `).join('');
             document.getElementById('milestones').innerHTML = milestonesHtml;
 

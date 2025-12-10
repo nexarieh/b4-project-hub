@@ -226,15 +226,15 @@ def main():
             'blocker': 'PVT sign-off waiting on Chicony samples'
         },
         'milestones': [
-            {'name': 'DVT signoff', 'status': 'done'},
-            {'name': 'PVT 0.5', 'status': 'done'},
-            {'name': 'PVT 1.0', 'status': 'done'},
-            {'name': 'Initial FT', 'status': 'done'},
-            {'name': 'Field Test 2', 'status': 'done'},
-            {'name': 'Field Test 3', 'status': 'in_progress'},
-            {'name': 'PVT sign-off', 'status': 'blocked'},
-            {'name': 'MVP', 'status': 'in_progress'},
-            {'name': 'Full Product', 'status': 'backlog'}
+            {'name': 'DVT signoff', 'status': 'done', 'date': '2024-Q3'},
+            {'name': 'PVT 0.5', 'status': 'done', 'date': '2024-Q4'},
+            {'name': 'PVT 1.0', 'status': 'done', 'date': '2024-Q4'},
+            {'name': 'Initial FT', 'status': 'done', 'date': 'Oct 2024'},
+            {'name': 'Field Test 2', 'status': 'done', 'date': 'Nov 2024'},
+            {'name': 'Field Test 3', 'status': 'in_progress', 'date': 'Dec 2024'},
+            {'name': 'PVT sign-off', 'status': 'blocked', 'date': 'TBD'},
+            {'name': 'MVP', 'status': 'in_progress', 'date': 'Q1 2025'},
+            {'name': 'Full Product', 'status': 'backlog', 'date': 'TBD'}
         ],
         'priorities': [
             {'title': 'FT Readiness: OBD issue', 'ticket': 'TBD'},

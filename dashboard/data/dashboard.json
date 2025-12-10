@@ -1,5 +1,5 @@
 {
-  "updated": "2025-12-11T01:26:33.682679",
+  "updated": "2025-12-11T01:30:29.186741",
   "project": {
     "name": "Beam4K (B4)",
     "phase": "Field Test 3 / MVP Development",
@@ -8,39 +8,48 @@
   "milestones": [
     {
       "name": "DVT signoff",
-      "status": "done"
+      "status": "done",
+      "date": "2024-Q3"
     },
     {
       "name": "PVT 0.5",
-      "status": "done"
+      "status": "done",
+      "date": "2024-Q4"
     },
     {
       "name": "PVT 1.0",
-      "status": "done"
+      "status": "done",
+      "date": "2024-Q4"
     },
     {
       "name": "Initial FT",
-      "status": "done"
+      "status": "done",
+      "date": "Oct 2024"
     },
     {
       "name": "Field Test 2",
-      "status": "done"
+      "status": "done",
+      "date": "Nov 2024"
     },
     {
       "name": "Field Test 3",
-      "status": "in_progress"
+      "status": "in_progress",
+      "date": "Dec 2024"
     },
     {
       "name": "PVT sign-off",
-      "status": "blocked"
+      "status": "blocked",
+      "date": "TBD"
     },
     {
       "name": "MVP",
-      "status": "in_progress"
+      "status": "in_progress",
+      "date": "Q1 2025"
     },
     {
       "name": "Full Product",
-      "status": "backlog"
+      "status": "backlog",
+      "date": "TBD"
     }
   ],
   "priorities": [
