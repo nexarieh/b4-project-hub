@@ -67,7 +67,7 @@
 | 2 | MVP: Remote stream bugs | [FS-3375](https://getnexar.atlassian.net/browse/FS-3375) |
 | 3 | MVP: Encryption | [FS-3283](https://getnexar.atlassian.net/browse/FS-3283) |
 | 4 | MVP: HTTP Server "Teepee" | [FS-2677](https://getnexar.atlassian.net/browse/FS-2677) |
-| 5 | Integrate new Logstore | TBD |
+| 5 | Integrate new Logstore | [FS-3322](https://getnexar.atlassian.net/browse/FS-3322) |
 
 ---
 

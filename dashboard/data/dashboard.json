@@ -1,5 +1,5 @@
 {
-  "updated": "2025-12-11T01:34:45.947000",
+  "updated": "2025-12-11T01:41:22.498941",
   "project": {
     "name": "Beam4K (B4)",
     "phase": "Field Test 3 / MVP Development",
@@ -81,7 +81,7 @@
     },
     {
       "title": "Integrate new Logstore",
-      "ticket": "TBD"
+      "ticket": "FS-3322"
     }
   ],
   "releases": [
