@@ -13,6 +13,7 @@ Open http://localhost:8081
 
 | Resource | Link |
 |----------|------|
+| Project Timeline | [JIRA Timeline](https://getnexar.atlassian.net/jira/software/c/projects/FS/boards/268/timeline?statuses=2%2C4&timeline=MONTHS) |
 | Release Plan | [Confluence](https://getnexar.atlassian.net/wiki/spaces/EMB/pages/4832722963) |
 | JIRA Board | [FS-268 Backlog](https://getnexar.atlassian.net/jira/software/c/projects/FS/boards/268/backlog) |
 | BR Bugs | [Beam4 Bugs](https://getnexar.atlassian.net/jira/software/c/projects/BR/boards/287/backlog?issueParent=109691) |

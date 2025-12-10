@@ -210,6 +210,7 @@ def main():
             'ticket_status': status_counts
         },
         'links': {
+            'timeline': 'https://getnexar.atlassian.net/jira/software/c/projects/FS/boards/268/timeline?statuses=2%2C4&timeline=MONTHS',
             'release_plan': 'https://getnexar.atlassian.net/wiki/spaces/EMB/pages/4832722963',
             'jira_board': 'https://getnexar.atlassian.net/jira/software/c/projects/FS/boards/268/backlog',
             'br_bugs': 'https://getnexar.atlassian.net/jira/software/c/projects/BR/boards/287/backlog?issueParent=109691',
