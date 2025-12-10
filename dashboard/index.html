@@ -407,6 +407,14 @@
                     </div>
                 </div>
                 <a href="${data.links.jenkins}" target="_blank">🔧 Jenkins (B4 Builds)</a>
+                <div class="dropdown">
+                    <a href="#" class="dropdown-toggle" onclick="event.preventDefault(); this.parentElement.classList.toggle('open')">🐙 GitHub ▾</a>
+                    <div class="dropdown-menu">
+                        <a href="${data.links.gh_chicony}" target="_blank">nexar-chicony</a>
+                        <a href="${data.links.gh_sdk}" target="_blank">nexar-client-sdk</a>
+                        <a href="${data.links.gh_hub}" target="_blank">b4-project-hub</a>
+                    </div>
+                </div>
             `;
             document.getElementById('links').innerHTML = linksHtml;
 

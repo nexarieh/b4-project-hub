@@ -272,7 +272,10 @@ def main():
             'odm_export': 'https://drive.google.com/drive/folders/1lFlqGslitGcLlwvC3xXvD4WrOqcWQ6Fh',
             'slack_eng': 'https://app.slack.com/client/T02KEL8KX/C0824FCA2GM',
             'slack_general': 'https://app.slack.com/client/T02KEL8KX/C08M9J1S9CG',
-            'jenkins': 'https://ci.nexar.cloud/job/Firmware/job/build-nexar-chicony/job/b4hw-fw2/'
+            'jenkins': 'https://ci.nexar.cloud/job/Firmware/job/build-nexar-chicony/job/b4hw-fw2/',
+            'gh_chicony': 'https://github.com/getnexar/nexar-chicony',
+            'gh_sdk': 'https://github.com/getnexar/nexar-client-sdk',
+            'gh_hub': 'https://github.com/nexarieh/b4-project-hub'
         }
     }
 

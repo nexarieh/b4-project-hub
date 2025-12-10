@@ -22,6 +22,7 @@
 | **ODM Export** | [Google Drive](https://drive.google.com/drive/folders/1lFlqGslitGcLlwvC3xXvD4WrOqcWQ6Fh) |
 | **Slack** | [#eng-beam4k](https://app.slack.com/client/T02KEL8KX/C0824FCA2GM) · [#general-beam4k](https://app.slack.com/client/T02KEL8KX/C08M9J1S9CG) |
 | **Jenkins** | [B4 Builds](https://ci.nexar.cloud/job/Firmware/job/build-nexar-chicony/job/b4hw-fw2/) |
+| **GitHub** | [nexar-chicony](https://github.com/getnexar/nexar-chicony) · [nexar-client-sdk](https://github.com/getnexar/nexar-client-sdk) · [b4-project-hub](https://github.com/nexarieh/b4-project-hub) |
 
 ---
 
