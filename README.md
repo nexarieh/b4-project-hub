@@ -17,6 +17,7 @@ Open http://localhost:8081
 | Releases | [JIRA Releases](https://getnexar.atlassian.net/projects/FS?selectedItem=com.atlassian.jira.jira-projects-plugin%3Arelease-page&status=no-filter) |
 | Release Plan | [Confluence](https://getnexar.atlassian.net/wiki/spaces/EMB/pages/4832722963) |
 | JIRA Board | [FS-268 Backlog](https://getnexar.atlassian.net/jira/software/c/projects/FS/boards/268/backlog) |
+| Chicony JIRA | [B4 Board (External)](https://nexar-chicony.atlassian.net/jira/core/projects/B4/board?filter=&groupBy=status) |
 | BR Bugs | [Beam4 Bugs](https://getnexar.atlassian.net/jira/software/c/projects/BR/boards/287/backlog?issueParent=109691) |
 | Serial Numbers | [FT Tracking Sheet](https://docs.google.com/spreadsheets/d/1ZAwoMznI-whqYJFvrwy9SrFTTNGQiMq62E_86qvR_sw/edit?gid=243956152#gid=243956152) |
 | ODM Export | [Google Drive](https://drive.google.com/drive/folders/1lFlqGslitGcLlwvC3xXvD4WrOqcWQ6Fh) |
