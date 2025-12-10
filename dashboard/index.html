@@ -173,8 +173,8 @@
 
             <!-- Main Content Area -->
             <div class="content-area">
-                <!-- Top Row: Releases, Milestones, BR Bugs -->
-                <div class="grid-3">
+                <!-- Top Row: Releases (wide) + Milestones -->
+                <div class="grid" style="grid-template-columns: 2fr 1fr;">
                     <!-- Releases -->
                     <div class="card">
                         <h2>🚀 Releases</h2>
@@ -184,7 +184,8 @@
                                     <tr>
                                         <th>Version</th>
                                         <th>Status</th>
-                                        <th>Date</th>
+                                        <th>Release Date</th>
+                                        <th>Description</th>
                                     </tr>
                                 </thead>
                                 <tbody id="releases-body">Loading...</tbody>
@@ -197,26 +198,9 @@
                         <h2>📍 Milestones</h2>
                         <div class="milestone-list" id="milestones">Loading...</div>
                     </div>
-
-                    <!-- Bugs -->
-                    <div class="card">
-                        <h2>🐛 BR Bugs</h2>
-                        <div class="scroll-table" style="max-height: 200px;">
-                            <table id="bugs-table">
-                                <thead>
-                                    <tr>
-                                        <th>Key</th>
-                                        <th>Summary</th>
-                                        <th>Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="bugs-body">Loading...</tbody>
-                            </table>
-                        </div>
-                    </div>
                 </div>
 
-                <!-- Middle Row: Priorities + Metrics -->
+                <!-- Second Row: Priorities + Metrics -->
                 <div class="grid">
                     <!-- Top Priorities -->
                     <div class="card">
@@ -231,22 +215,42 @@
                     </div>
                 </div>
 
-                <!-- Bottom: FS Tickets -->
-                <div class="card">
-                    <h2>📋 FS Tickets</h2>
-                    <div class="scroll-table">
-                        <table id="tickets-table">
-                            <thead>
-                                <tr>
-                                    <th>Key</th>
-                                    <th>Summary</th>
-                                    <th>Status</th>
-                                    <th>Priority</th>
-                                    <th>Assignee</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tickets-body">Loading...</tbody>
-                        </table>
+                <!-- Third Row: BR Bugs + FS Tickets -->
+                <div class="grid">
+                    <!-- Bugs -->
+                    <div class="card">
+                        <h2>🐛 BR Bugs</h2>
+                        <div class="scroll-table" style="max-height: 250px;">
+                            <table id="bugs-table">
+                                <thead>
+                                    <tr>
+                                        <th>Key</th>
+                                        <th>Summary</th>
+                                        <th>Status</th>
+                                        <th>Assignee</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="bugs-body">Loading...</tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- FS Tickets -->
+                    <div class="card">
+                        <h2>📋 FS Tickets</h2>
+                        <div class="scroll-table" style="max-height: 250px;">
+                            <table id="tickets-table">
+                                <thead>
+                                    <tr>
+                                        <th>Key</th>
+                                        <th>Summary</th>
+                                        <th>Status</th>
+                                        <th>Assignee</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tickets-body">Loading...</tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -310,15 +314,16 @@
             `;
             document.getElementById('metrics').innerHTML = metricsHtml;
 
-            // Releases (compact)
+            // Releases
             const releasesHtml = (data.releases || []).map(r => `
                 <tr>
                     <td><a class="ticket-link" href="${r.url}" target="_blank">${r.name}</a></td>
-                    <td><span class="status-badge ${r.released ? 'status-done' : 'status-in_progress'}">${r.released ? '✓' : '○'}</span></td>
+                    <td><span class="status-badge ${r.released ? 'status-done' : 'status-in_progress'}">${r.released ? 'Released' : 'Unreleased'}</span></td>
                     <td>${r.releaseDate || '-'}</td>
+                    <td class="truncate">${r.description || ''}</td>
                 </tr>
             `).join('');
-            document.getElementById('releases-body').innerHTML = releasesHtml || '<tr><td colspan="3">No releases</td></tr>';
+            document.getElementById('releases-body').innerHTML = releasesHtml || '<tr><td colspan="4">No releases</td></tr>';
 
             // Priorities
             const prioritiesHtml = data.priorities.map((p, i) => `
@@ -347,15 +352,16 @@
             `;
             document.getElementById('links').innerHTML = linksHtml;
 
-            // Bugs table (compact)
+            // Bugs table
             const bugsHtml = data.bugs.map(bug => `
                 <tr>
                     <td><a class="ticket-link" href="${bug.url}" target="_blank">${bug.key}</a></td>
                     <td class="truncate" title="${bug.summary}">${bug.summary}</td>
                     <td><span class="status-badge status-${bug.status.toLowerCase().replace(' ', '-')}">${bug.status}</span></td>
+                    <td>${bug.assignee}</td>
                 </tr>
             `).join('');
-            document.getElementById('bugs-body').innerHTML = bugsHtml || '<tr><td colspan="3">No bugs</td></tr>';
+            document.getElementById('bugs-body').innerHTML = bugsHtml || '<tr><td colspan="4">No bugs</td></tr>';
 
             // Tickets table
             const ticketsHtml = data.tickets.slice(0, 20).map(t => `
@@ -363,11 +369,10 @@
                     <td><a class="ticket-link" href="${t.url}" target="_blank">${t.key}</a></td>
                     <td class="truncate" title="${t.summary}">${t.summary}</td>
                     <td><span class="status-badge status-${t.status.toLowerCase().replace(' ', '-')}">${t.status}</span></td>
-                    <td>${t.priority}</td>
                     <td>${t.assignee}</td>
                 </tr>
             `).join('');
-            document.getElementById('tickets-body').innerHTML = ticketsHtml || '<tr><td colspan="5">No tickets found</td></tr>';
+            document.getElementById('tickets-body').innerHTML = ticketsHtml || '<tr><td colspan="4">No tickets</td></tr>';
 
             // Updated timestamp
             const updated = new Date(data.updated);
