@@ -21,11 +21,11 @@
 | nexar_n1 | `~/Git-new/nexar_n1` | N1 reference (for comparison) |
 
 ### Slack Channels
-| Channel | Purpose |
-|---------|---------|
-| #eng-beam4k | Main engineering channel |
-| #general-beam4 | General B4 discussions |
-| #b4-hw | Hardware team |
+| Channel | Link | Purpose |
+|---------|------|---------|
+| #eng-beam4k | [Open](https://app.slack.com/client/T02KEL8KX/C0824FCA2GM) | Main engineering channel |
+| #hw-beam4k | [Open](https://app.slack.com/client/T02KEL8KX/C054VJU0AC9) | Hardware team |
+| #general-beam4k | [Open](https://app.slack.com/client/T02KEL8KX/C08M9J1S9CG) | General B4 discussions |
 
 ### Other Tools
 | Tool | Link | Notes |
