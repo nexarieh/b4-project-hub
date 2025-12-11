@@ -275,7 +275,9 @@ def main():
             'jenkins': 'https://ci.nexar.cloud/job/Firmware/job/build-nexar-chicony/job/b4hw-fw2/',
             'gh_chicony': 'https://github.com/getnexar/nexar-chicony',
             'gh_sdk': 'https://github.com/getnexar/nexar-client-sdk',
-            'gh_hub': 'https://github.com/nexarieh/b4-project-hub'
+            'gh_hub': 'https://github.com/nexarieh/b4-project-hub',
+            'gh_my_prs': 'https://github.com/pulls?q=is%3Aopen+is%3Apr+author%3Anexarieh+org%3Agetnexar',
+            'gh_review_prs': 'https://github.com/pulls?q=is%3Aopen+is%3Apr+review-requested%3Anexarieh+org%3Agetnexar'
         }
     }
 

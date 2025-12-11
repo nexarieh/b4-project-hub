@@ -1,5 +1,5 @@
 {
-  "updated": "2025-12-11T01:59:28.554636",
+  "updated": "2025-12-11T02:02:45.214993",
   "project": {
     "name": "Beam4K (B4)",
     "phase": "Field Test 3 / MVP Development",
@@ -667,6 +667,8 @@
     "jenkins": "https://ci.nexar.cloud/job/Firmware/job/build-nexar-chicony/job/b4hw-fw2/",
     "gh_chicony": "https://github.com/getnexar/nexar-chicony",
     "gh_sdk": "https://github.com/getnexar/nexar-client-sdk",
-    "gh_hub": "https://github.com/nexarieh/b4-project-hub"
+    "gh_hub": "https://github.com/nexarieh/b4-project-hub",
+    "gh_my_prs": "https://github.com/pulls?q=is%3Aopen+is%3Apr+author%3Anexarieh+org%3Agetnexar",
+    "gh_review_prs": "https://github.com/pulls?q=is%3Aopen+is%3Apr+review-requested%3Anexarieh+org%3Agetnexar"
   }
 }
