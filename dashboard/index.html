@@ -248,42 +248,41 @@
                     </div>
                 </div>
 
-                <!-- Third Row: BR Bugs + FS Tickets -->
-                <div class="grid">
-                    <!-- Bugs -->
-                    <div class="card">
-                        <h2>🐛 BR Bugs</h2>
-                        <div class="scroll-table" style="max-height: 250px;">
-                            <table id="bugs-table">
-                                <thead>
-                                    <tr>
-                                        <th>Key</th>
-                                        <th>Summary</th>
-                                        <th>Status</th>
-                                        <th>Assignee</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="bugs-body">Loading...</tbody>
-                            </table>
-                        </div>
+                <!-- BR Bugs (full width) -->
+                <div class="card">
+                    <h2>🐛 BR Bugs</h2>
+                    <div class="scroll-table" style="max-height: 400px;">
+                        <table id="bugs-table">
+                            <thead>
+                                <tr>
+                                    <th>Key</th>
+                                    <th>Summary</th>
+                                    <th>Status</th>
+                                    <th>Assignee</th>
+                                    <th>Priority</th>
+                                </tr>
+                            </thead>
+                            <tbody id="bugs-body">Loading...</tbody>
+                        </table>
                     </div>
+                </div>
 
-                    <!-- FS Tickets -->
-                    <div class="card">
-                        <h2>📋 FS Tickets</h2>
-                        <div class="scroll-table" style="max-height: 250px;">
-                            <table id="tickets-table">
-                                <thead>
-                                    <tr>
-                                        <th>Key</th>
-                                        <th>Summary</th>
-                                        <th>Status</th>
-                                        <th>Assignee</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="tickets-body">Loading...</tbody>
-                            </table>
-                        </div>
+                <!-- FS Tickets (full width) -->
+                <div class="card">
+                    <h2>📋 FS Tickets</h2>
+                    <div class="scroll-table" style="max-height: 400px;">
+                        <table id="tickets-table">
+                            <thead>
+                                <tr>
+                                    <th>Key</th>
+                                    <th>Summary</th>
+                                    <th>Status</th>
+                                    <th>Assignee</th>
+                                    <th>Priority</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tickets-body">Loading...</tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -427,20 +426,22 @@
                     <td class="truncate" title="${bug.summary}">${bug.summary}</td>
                     <td><span class="status-badge status-${bug.status.toLowerCase().replace(' ', '-')}">${bug.status}</span></td>
                     <td>${bug.assignee}</td>
+                    <td>${bug.priority || '-'}</td>
                 </tr>
             `).join('');
-            document.getElementById('bugs-body').innerHTML = bugsHtml || '<tr><td colspan="4">No bugs</td></tr>';
+            document.getElementById('bugs-body').innerHTML = bugsHtml || '<tr><td colspan="5">No bugs</td></tr>';
 
             // Tickets table
-            const ticketsHtml = data.tickets.slice(0, 20).map(t => `
+            const ticketsHtml = data.tickets.slice(0, 40).map(t => `
                 <tr>
                     <td><a class="ticket-link" href="${t.url}" target="_blank">${t.key}</a></td>
                     <td class="truncate" title="${t.summary}">${t.summary}</td>
                     <td><span class="status-badge status-${t.status.toLowerCase().replace(' ', '-')}">${t.status}</span></td>
                     <td>${t.assignee}</td>
+                    <td>${t.priority || '-'}</td>
                 </tr>
             `).join('');
-            document.getElementById('tickets-body').innerHTML = ticketsHtml || '<tr><td colspan="4">No tickets</td></tr>';
+            document.getElementById('tickets-body').innerHTML = ticketsHtml || '<tr><td colspan="5">No tickets</td></tr>';
 
             // Updated timestamp
             const updated = new Date(data.updated);
