@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>B4 Project Dashboard</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
@@ -393,16 +395,24 @@
                     <div class="dropdown-menu">
                         <a href="${data.links.chicony_jira}" target="_blank">B4 (Chicony)</a>
                         <a href="${data.links.dastic_jira}" target="_blank">DAS (Dastic)</a>
+                        <a href="https://getnexar-acko.atlassian.net/jira/software/projects/KAN/boards/1" target="_blank">PICO (Acko)</a>
                     </div>
                 </div>
                 <a href="${data.links.sprint_planning}" target="_blank">🗓️ ${data.links.sprint_title || 'Sprint Planning'}</a>
                 <a href="${data.links.serial_numbers}" target="_blank">📊 Serial Numbers (FT Tracking)</a>
                 <a href="${data.links.odm_export}" target="_blank">📁 ODM Export (Google Drive)</a>
                 <div class="dropdown">
-                    <a href="#" class="dropdown-toggle" onclick="event.preventDefault(); this.parentElement.classList.toggle('open')">💬 Slack ▾</a>
+                    <a href="#" class="dropdown-toggle" onclick="event.preventDefault(); this.parentElement.classList.toggle('open')">💬 Slack Internal ▾</a>
                     <div class="dropdown-menu">
                         <a href="${data.links.slack_eng}" target="_blank">#eng-beam4k</a>
                         <a href="${data.links.slack_general}" target="_blank">#general-beam4k</a>
+                    </div>
+                </div>
+                <div class="dropdown">
+                    <a href="#" class="dropdown-toggle" onclick="event.preventDefault(); this.parentElement.classList.toggle('open')">💬 Slack External ▾</a>
+                    <div class="dropdown-menu">
+                        <a href="https://app.slack.com/client/T08V7G1079N/C090K46SA7P" target="_blank">AONI</a>
+                        <a href="https://app.slack.com/client/T0780SDQR5W/C077HGQ1ASF" target="_blank">Chicony</a>
                     </div>
                 </div>
                 <a href="${data.links.jenkins}" target="_blank">🔧 Jenkins (B4 Builds)</a>

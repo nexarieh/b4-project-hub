@@ -16,11 +16,12 @@
 | **Timeline** | [Project Timeline](https://getnexar.atlassian.net/jira/software/c/projects/FS/boards/268/timeline?statuses=2%2C4&timeline=MONTHS) |
 | **Release Plan** | [Confluence](https://getnexar.atlassian.net/wiki/spaces/EMB/pages/4832722963) |
 | **JIRA Internal** | [FS Board](https://getnexar.atlassian.net/jira/software/c/projects/FS/boards/268/backlog) · [BR Bugs](https://getnexar.atlassian.net/jira/software/c/projects/BR/boards/287/backlog?issueParent=109691) |
-| **JIRA External** | [B4 (Chicony)](https://nexar-chicony.atlassian.net/jira/core/projects/B4/board?filter=&groupBy=status) · [DAS (Dastic)](https://nexar-chicony.atlassian.net/jira/core/projects/DAS/board?filter=&groupBy=status) |
+| **JIRA External** | [B4 (Chicony)](https://nexar-chicony.atlassian.net/jira/core/projects/B4/board?filter=&groupBy=status) · [DAS (Dastic)](https://nexar-chicony.atlassian.net/jira/core/projects/DAS/board?filter=&groupBy=status) · [PICO (Acko)](https://getnexar-acko.atlassian.net/jira/software/projects/KAN/boards/1) |
 | **Sprint Planning** | [WW49 Planning](https://getnexar.atlassian.net/wiki/spaces/EMB/pages/5111021619) |
 | **Serial Numbers** | [FT Tracking Sheet](https://docs.google.com/spreadsheets/d/1ZAwoMznI-whqYJFvrwy9SrFTTNGQiMq62E_86qvR_sw/edit?gid=243956152#gid=243956152) |
 | **ODM Export** | [Google Drive](https://drive.google.com/drive/folders/1lFlqGslitGcLlwvC3xXvD4WrOqcWQ6Fh) |
-| **Slack** | [#eng-beam4k](https://app.slack.com/client/T02KEL8KX/C0824FCA2GM) · [#general-beam4k](https://app.slack.com/client/T02KEL8KX/C08M9J1S9CG) |
+| **Slack Internal** | [#eng-beam4k](https://app.slack.com/client/T02KEL8KX/C0824FCA2GM) · [#general-beam4k](https://app.slack.com/client/T02KEL8KX/C08M9J1S9CG) |
+| **Slack External** | [AONI](https://app.slack.com/client/T08V7G1079N/C090K46SA7P) · [Chicony](https://app.slack.com/client/T0780SDQR5W/C077HGQ1ASF) |
 | **Jenkins** | [B4 Builds](https://ci.nexar.cloud/job/Firmware/job/build-nexar-chicony/job/b4hw-fw2/) |
 | **GitHub** | [nexar-chicony](https://github.com/getnexar/nexar-chicony) · [nexar-client-sdk](https://github.com/getnexar/nexar-client-sdk) · [b4-project-hub](https://github.com/nexarieh/b4-project-hub) · [My PRs](https://github.com/pulls?q=is%3Aopen+is%3Apr+author%3Anexarieh+org%3Agetnexar) · [Review Requests](https://github.com/pulls?q=is%3Aopen+is%3Apr+review-requested%3Anexarieh+org%3Agetnexar) |
 
@@ -104,10 +105,19 @@
 Run the interactive dashboard locally:
 
 ```bash
-cd dashboard && python3 fetch_data.py && python3 -m http.server 8081
+cd dashboard && python3 fetch_data.py && python3 serve.py
 ```
 
 Open http://localhost:8081
+
+### Server Commands
+
+| Action | Command |
+|--------|---------|
+| **Start** | `cd dashboard && python3 serve.py` |
+| **Restart** | `cd dashboard && ./restart.sh` |
+| **Refresh Data** | `cd dashboard && python3 fetch_data.py` |
+| **Stop** | `pkill -f "serve.py"` |
 
 ---
 
