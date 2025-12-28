@@ -263,7 +263,10 @@
                 <h1>🚗 B4 Project Dashboard</h1>
                 <p class="subtitle" id="project-phase">Loading...</p>
             </div>
-            <button id="refresh-btn" onclick="refreshData()">🔄 Refresh Data</button>
+            <div style="display: flex; gap: 10px;">
+                <a id="sprint-btn" href="#" target="_blank" style="background:#1f6feb;color:#fff;border:none;padding:10px 20px;border-radius:6px;cursor:pointer;font-size:14px;font-weight:500;text-decoration:none;display:inline-block;">🗓️ Current Sprint</a>
+                <button id="refresh-btn" onclick="refreshData()">🔄 Refresh Data</button>
+            </div>
         </div>
 
         <div class="main-layout">
@@ -352,10 +355,34 @@
             </div>
 
             <!-- Velocity Chart (full width) -->
-            <div class="card chart-container" style="margin-top: 20px; grid-column: 1 / -1;" onclick="openChartFullscreen()">
-                <h2>📈 Velocity Chart (Last 8 Weeks) <span style="font-size: 12px; color: #8b949e;">(click to expand)</span></h2>
-                <div style="height: 280px;">
+            <div class="card" style="margin-top: 20px; grid-column: 1 / -1;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #30363d;">
+                    <h2 style="margin: 0; border: none; padding: 0;">📈 Velocity Chart <span id="velocity-title">(Last 8 Weeks)</span></h2>
+                    <div style="display: flex; gap: 8px;">
+                        <button id="sprint-velocity-btn" onclick="toggleSprintView()" style="background:#1f6feb;color:#fff;border:none;padding:6px 12px;border-radius:4px;cursor:pointer;font-size:12px;">🎯 Sprint View</button>
+                        <button onclick="openChartFullscreen()" style="background:#30363d;color:#c9d1d9;border:none;padding:6px 12px;border-radius:4px;cursor:pointer;font-size:12px;">⛶ Expand</button>
+                    </div>
+                </div>
+                <div class="chart-container" style="height: 280px;" onclick="if(event.target.tagName !== 'BUTTON') openChartFullscreen()">
                     <canvas id="velocity-chart"></canvas>
+                </div>
+                <!-- Sprint Issues Table (hidden by default) -->
+                <div id="sprint-issues-container" style="display: none; margin-top: 16px;">
+                    <h3 style="color: #8b949e; font-size: 13px; margin-bottom: 8px;">Sprint Issues (<span id="sprint-issues-count">0</span>)</h3>
+                    <div class="scroll-table" style="max-height: 300px;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Key</th>
+                                    <th>Summary</th>
+                                    <th>Type</th>
+                                    <th>Status</th>
+                                    <th>Resolved</th>
+                                </tr>
+                            </thead>
+                            <tbody id="sprint-issues-body"></tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
@@ -439,6 +466,14 @@
             // Project phase
             document.getElementById('project-phase').textContent =
                 `${data.project.name} • ${data.project.phase}`;
+
+            // Sprint button - link to active sprint on board
+            if (data.links.active_sprint) {
+                document.getElementById('sprint-btn').href = data.links.active_sprint;
+                document.getElementById('sprint-btn').textContent = `🎯 ${data.links.active_sprint_name || 'Active Sprint'}`;
+            } else {
+                document.getElementById('sprint-btn').style.display = 'none';
+            }
 
             // Milestones (table)
             const milestonesHtml = data.milestones.map(m => {
@@ -583,9 +618,10 @@
 
                 // Calculate cumulative values
                 let cumResolved = 0, cumCreated = 0;
+                const initialOpen = data.initial_open || 0;
                 const cumulativeResolved = data.velocity.map(v => { cumResolved += v.resolved; return cumResolved; });
                 cumCreated = 0;
-                const cumulativeCreated = data.velocity.map(v => { cumCreated += v.created; return cumCreated; });
+                const cumulativeCreated = data.velocity.map(v => { cumCreated += v.created; return initialOpen + cumCreated; });
 
                 // Open bugs at each week (starting from initial_bugs)
                 let openBugs = data.initial_bugs || 0;
@@ -820,6 +856,156 @@
             renderTicketsPage();
         }
 
+        // Sprint view toggle
+        window.sprintViewActive = false;
+
+        function toggleSprintView() {
+            window.sprintViewActive = !window.sprintViewActive;
+            const btn = document.getElementById('sprint-velocity-btn');
+            const title = document.getElementById('velocity-title');
+            const issuesContainer = document.getElementById('sprint-issues-container');
+
+            if (window.sprintViewActive) {
+                btn.textContent = '📊 8 Week View';
+                btn.style.background = '#238636';
+                const sprintData = window.lastVelocityData?.sprint_data;
+                title.textContent = `(${sprintData?.name || 'Current Sprint'})`;
+                issuesContainer.style.display = 'block';
+                renderSprintChart();
+                renderSprintIssues();
+            } else {
+                btn.textContent = '🎯 Sprint View';
+                btn.style.background = '#1f6feb';
+                title.textContent = '(Last 8 Weeks)';
+                issuesContainer.style.display = 'none';
+                render8WeekChart();
+            }
+        }
+
+        function renderSprintChart() {
+            const data = window.lastVelocityData;
+            if (!data || !data.sprint_data) return;
+
+            const ctx = document.getElementById('velocity-chart').getContext('2d');
+            if (window.velocityChart) window.velocityChart.destroy();
+
+            const sprintData = data.sprint_data;
+            const issues = sprintData.issues || [];
+
+            // Count by status
+            const done = issues.filter(i => ['Done', 'Closed'].includes(i.status)).length;
+            const inProgress = issues.filter(i => i.status === 'In Progress').length;
+            const todo = issues.filter(i => !['Done', 'Closed', 'In Progress', 'Dropped'].includes(i.status)).length;
+            const total = issues.length;
+
+            window.velocityChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Done', 'In Progress', 'To Do'],
+                    datasets: [{
+                        data: [done, inProgress, todo],
+                        backgroundColor: ['#238636', '#1f6feb', '#484f58'],
+                        borderColor: '#161b22',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'right', labels: { color: '#c9d1d9' } },
+                        datalabels: {
+                            color: '#fff',
+                            font: { size: 14, weight: 'bold' },
+                            formatter: (val) => val > 0 ? val : ''
+                        },
+                        title: {
+                            display: true,
+                            text: `Sprint: ${done}/${total} completed (${Math.round(done/total*100)}%)`,
+                            color: '#c9d1d9',
+                            font: { size: 16 }
+                        }
+                    }
+                },
+                plugins: [ChartDataLabels]
+            });
+        }
+
+        function renderSprintIssues() {
+            const data = window.lastVelocityData;
+            if (!data || !data.sprint_data) return;
+
+            const issues = data.sprint_data.issues || [];
+            document.getElementById('sprint-issues-count').textContent = issues.length;
+
+            // Sort: In Progress first, then To Do, then Done
+            const statusOrder = {'In Progress': 0, 'To Do': 1, 'New': 1, 'Backlog': 2, 'Done': 3, 'Closed': 4, 'Dropped': 5};
+            issues.sort((a, b) => (statusOrder[a.status] || 2) - (statusOrder[b.status] || 2));
+
+            const html = issues.map(issue => {
+                const statusClass = issue.status.toLowerCase().replace(' ', '-');
+                return `<tr>
+                    <td><a class="ticket-link" href="https://getnexar.atlassian.net/browse/${issue.key}" target="_blank">${issue.key}</a></td>
+                    <td class="truncate" title="${issue.summary}">${issue.summary}</td>
+                    <td>${issue.type}</td>
+                    <td><span class="status-badge status-${statusClass}">${issue.status}</span></td>
+                    <td>${issue.resolved || '-'}</td>
+                </tr>`;
+            }).join('');
+
+            document.getElementById('sprint-issues-body').innerHTML = html || '<tr><td colspan="5">No sprint issues</td></tr>';
+        }
+
+        function render8WeekChart() {
+            const data = window.lastVelocityData;
+            if (!data || !data.velocity) return;
+
+            const ctx = document.getElementById('velocity-chart').getContext('2d');
+            if (window.velocityChart) window.velocityChart.destroy();
+
+            let cumResolved = 0, cumCreated = 0;
+            const initialOpen = data.initial_open || 0;
+            const cumulativeResolved = data.velocity.map(v => { cumResolved += v.resolved; return cumResolved; });
+            cumCreated = 0;
+            const cumulativeCreated = data.velocity.map(v => { cumCreated += v.created; return initialOpen + cumCreated; });
+
+            let openBugs = data.initial_bugs || 0;
+            const openBugsLine = data.velocity.map(v => {
+                openBugs += (v.bugs_created || 0) - (v.bugs_resolved || 0);
+                return openBugs;
+            });
+
+            const totalResolved = data.velocity.reduce((sum, v) => sum + v.resolved, 0);
+            const avgVelocity = totalResolved / data.velocity.length;
+            const velocityTrendLine = data.velocity.map((v, i) => avgVelocity * (i + 1));
+
+            window.velocityChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.velocity.map(v => v.week),
+                    datasets: [
+                        { label: 'Open Bugs', data: openBugsLine, borderColor: '#da3633', backgroundColor: 'rgba(218, 54, 51, 0.1)', fill: true, tension: 0.3, borderWidth: 2 },
+                        { label: `Velocity Trend (${avgVelocity.toFixed(1)}/wk)`, data: velocityTrendLine, borderColor: 'rgba(255, 255, 255, 0.4)', borderDash: [5, 5], backgroundColor: 'transparent', fill: false, tension: 0, borderWidth: 2, pointRadius: 0, datalabels: { display: false } },
+                        { label: 'Resolved (cumulative)', data: cumulativeResolved, borderColor: '#238636', backgroundColor: 'rgba(35, 134, 54, 0.1)', fill: true, tension: 0.3 },
+                        { label: 'Created (cumulative)', data: cumulativeCreated, borderColor: '#1f6feb', backgroundColor: 'rgba(31, 111, 235, 0.1)', fill: true, tension: 0.3 }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { reverse: true, labels: { color: '#8b949e' } },
+                        datalabels: { display: (ctx) => ctx.dataIndex % 2 === 1, color: '#c9d1d9', font: { size: 10 }, anchor: 'end', align: 'top' }
+                    },
+                    scales: {
+                        x: { ticks: { color: '#8b949e' }, grid: { color: '#21262d' } },
+                        y: { ticks: { color: '#8b949e' }, grid: { color: '#21262d' }, beginAtZero: true }
+                    }
+                },
+                plugins: [ChartDataLabels]
+            });
+        }
+
         function openChartFullscreen() {
             document.getElementById('chart-fullscreen').style.display = 'block';
             document.body.style.overflow = 'hidden';
@@ -844,8 +1030,9 @@
 
             // Same chart config as main chart
             let cumResolved = 0, cumCreated = 0;
+            const initialOpen = data.initial_open || 0;
             const cumulativeResolved = data.velocity.map(v => { cumResolved += v.resolved; return cumResolved; });
-            const cumulativeCreated = data.velocity.map(v => { cumCreated += v.created; return cumCreated; });
+            const cumulativeCreated = data.velocity.map(v => { cumCreated += v.created; return initialOpen + cumCreated; });
 
             let openBugs = data.initial_bugs || 0;
             const openBugsLine = data.velocity.map(v => {

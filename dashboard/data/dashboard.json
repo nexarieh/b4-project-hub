@@ -1,5 +1,5 @@
 {
-  "updated": "2025-12-28T17:04:35.109186",
+  "updated": "2025-12-28T17:22:47.140339",
   "project": {
     "name": "Beam4K (B4)",
     "phase": "Field Test 3 / MVP Development",
@@ -209,8 +209,247 @@
       "bugs_created": 6
     }
   ],
-  "initial_open": 57,
+  "initial_open": 35,
   "initial_bugs": 2,
+  "sprint_data": {
+    "name": "MX Sprint Y WW51",
+    "start": "2025-12-14",
+    "end": "2025-12-29",
+    "issues": [
+      {
+        "key": "FS-3459",
+        "summary": "[B4] non working url resolution on release",
+        "status": "In Progress",
+        "type": "Bug",
+        "resolved": null,
+        "created": "2025-12-28"
+      },
+      {
+        "key": "FS-3457",
+        "summary": "[B4] Enable flipz for TinyCarSense - accelerometer axis inve",
+        "status": "In Review",
+        "type": "Bug",
+        "resolved": null,
+        "created": "2025-12-24"
+      },
+      {
+        "key": "FS-3455",
+        "summary": "[B4] user_settings_manager crashes in loop on boot causing p",
+        "status": "Selected for Execution",
+        "type": "Bug",
+        "resolved": null,
+        "created": "2025-12-24"
+      },
+      {
+        "key": "FS-3452",
+        "summary": "  [B4] IFC clips not created due to race condition in boot-t",
+        "status": "Selected for Execution",
+        "type": "Bug",
+        "resolved": null,
+        "created": "2025-12-23"
+      },
+      {
+        "key": "FS-3445",
+        "summary": "[B4] Add support for when powered by CLA",
+        "status": "Done",
+        "type": "Story",
+        "resolved": "2025-12-25",
+        "created": "2025-12-23"
+      },
+      {
+        "key": "FS-3442",
+        "summary": "B4: Thumbnails (JPGs) are corrupted",
+        "status": "Done",
+        "type": "Bug",
+        "resolved": "2025-12-24",
+        "created": "2025-12-22"
+      },
+      {
+        "key": "FS-3438",
+        "summary": "[B4] LTE module update",
+        "status": "In Progress",
+        "type": "Task",
+        "resolved": null,
+        "created": "2025-12-22"
+      },
+      {
+        "key": "FS-3436",
+        "summary": "[B4] remove OBD code from the version",
+        "status": "Done",
+        "type": "Task",
+        "resolved": "2025-12-22",
+        "created": "2025-12-21"
+      },
+      {
+        "key": "FS-3432",
+        "summary": "Add nxdevices support",
+        "status": "In Review",
+        "type": "Task",
+        "resolved": null,
+        "created": "2025-12-18"
+      },
+      {
+        "key": "FS-3430",
+        "summary": "[B4] GPS Speed not getting fix even if GPS has it",
+        "status": "In Progress",
+        "type": "Bug",
+        "resolved": null,
+        "created": "2025-12-18"
+      },
+      {
+        "key": "FS-3420",
+        "summary": "[B4] create a version with no OBD useage for FT",
+        "status": "Done",
+        "type": "Task",
+        "resolved": "2025-12-21",
+        "created": "2025-12-14"
+      },
+      {
+        "key": "FS-3415",
+        "summary": "[B4] Integarte latest MCU version into FW2",
+        "status": "In Review",
+        "type": "Task",
+        "resolved": null,
+        "created": "2025-12-14"
+      },
+      {
+        "key": "FS-3410",
+        "summary": "[B4] Fix artifact_replication table empty after restore-to-d",
+        "status": "Done",
+        "type": "Task",
+        "resolved": "2025-12-24",
+        "created": "2025-12-14"
+      },
+      {
+        "key": "FS-3409",
+        "summary": "[B4] Investigate continuous reboot loop (suspected MCU reset",
+        "status": "Done",
+        "type": "Task",
+        "resolved": "2025-12-24",
+        "created": "2025-12-14"
+      },
+      {
+        "key": "FS-3395",
+        "summary": "[B4] Camera crops secondary resolutions",
+        "status": "In Review",
+        "type": "Bug",
+        "resolved": null,
+        "created": "2025-12-10"
+      },
+      {
+        "key": "FS-3376",
+        "summary": "[B4] Recovery partition: format `/data` /SD-card only after ",
+        "status": "In Progress",
+        "type": "Task",
+        "resolved": null,
+        "created": "2025-12-01"
+      },
+      {
+        "key": "FS-3375",
+        "summary": "[B4] Remote live streaming over LTE does not start despite a",
+        "status": "Done",
+        "type": "Bug",
+        "resolved": "2025-12-23",
+        "created": "2025-12-01"
+      },
+      {
+        "key": "FS-3363",
+        "summary": "[B4] Camera LED goes from Red > Yellow > Solid White during ",
+        "status": "Selected for Execution",
+        "type": "Task",
+        "resolved": null,
+        "created": "2025-11-26"
+      },
+      {
+        "key": "FS-3355",
+        "summary": "[B4] After changing the video settings, the image became not",
+        "status": "Dropped",
+        "type": "Bug",
+        "resolved": null,
+        "created": "2025-11-23"
+      },
+      {
+        "key": "FS-3348",
+        "summary": "[B4] Release mode: Disable WiFi by default",
+        "status": "Done",
+        "type": "Task",
+        "resolved": "2025-12-23",
+        "created": "2025-11-20"
+      },
+      {
+        "key": "FS-3322",
+        "summary": "[B4] Integrate LogStore Service into SDK (systemd)",
+        "status": "Done",
+        "type": "Story",
+        "resolved": "2025-12-25",
+        "created": "2025-11-12"
+      },
+      {
+        "key": "FS-3308",
+        "summary": "Camera does not wake with LTE (wakeup_lte default = 0)",
+        "status": "Done",
+        "type": "Bug",
+        "resolved": "2025-12-28",
+        "created": "2025-11-11"
+      },
+      {
+        "key": "FS-3291",
+        "summary": "[B4] MCU reboot loop when battery is low",
+        "status": "Done",
+        "type": "Bug",
+        "resolved": "2025-12-18",
+        "created": "2025-11-06"
+      },
+      {
+        "key": "FS-3283",
+        "summary": "[B4] Encrypt Recorded Video Files on SD Card",
+        "status": "In Review",
+        "type": "Task",
+        "resolved": null,
+        "created": "2025-11-06"
+      },
+      {
+        "key": "FS-3281",
+        "summary": "[B4] Camera wakes up on Audio even if audio wakeup is disabl",
+        "status": "Selected for Execution",
+        "type": "Bug",
+        "resolved": null,
+        "created": "2025-11-05"
+      },
+      {
+        "key": "FS-3231",
+        "summary": "[QA] Run validation test for B4 FT (Field testing)",
+        "status": "On Hold",
+        "type": "Task",
+        "resolved": null,
+        "created": "2025-10-21"
+      },
+      {
+        "key": "FS-3194",
+        "summary": "[B4][MCU] Aux protection mode support",
+        "status": "Selected for Execution",
+        "type": "Task",
+        "resolved": null,
+        "created": "2025-10-10"
+      },
+      {
+        "key": "FS-3051",
+        "summary": "[B4] HWK ACC event not suported",
+        "status": "Selected for Execution",
+        "type": "Bug",
+        "resolved": null,
+        "created": "2025-07-30"
+      },
+      {
+        "key": "FS-2899",
+        "summary": "[B4] FW build on macOS is broken",
+        "status": "Blocked",
+        "type": "Bug",
+        "resolved": null,
+        "created": "2025-07-02"
+      }
+    ]
+  },
   "bugs": [
     {
       "key": "BR-143",
@@ -784,6 +1023,8 @@
     "gh_sdk": "https://github.com/getnexar/nexar-client-sdk",
     "gh_hub": "https://github.com/nexarieh/b4-project-hub",
     "gh_my_prs": "https://github.com/pulls?q=is%3Aopen+is%3Apr+author%3Anexarieh+org%3Agetnexar",
-    "gh_review_prs": "https://github.com/pulls?q=is%3Aopen+is%3Apr+review-requested%3Anexarieh+org%3Agetnexar"
+    "gh_review_prs": "https://github.com/pulls?q=is%3Aopen+is%3Apr+review-requested%3Anexarieh+org%3Agetnexar",
+    "active_sprint": "https://getnexar.atlassian.net/jira/software/c/projects/FS/boards/268?selectedIssue=&sprint=4491",
+    "active_sprint_name": "MX Sprint Y WW51"
   }
 }

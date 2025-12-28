@@ -205,13 +205,34 @@ def fetch_top_priorities(auth):
     response = requests.get(url, auth=auth)
 
     if response.status_code != 200:
-        return []
+        return {'priorities': [], 'sprint_id': None, 'sprint_name': None}
 
     sprints = response.json().get('values', [])
     if not sprints:
-        return []
+        return {'priorities': [], 'sprint_id': None, 'sprint_name': None}
 
     active_sprint_id = sprints[0]['id']
+    active_sprint_name = sprints[0].get('name', 'Active Sprint')
+    sprint_start = sprints[0].get('startDate', '')[:10] if sprints[0].get('startDate') else None
+    sprint_end = sprints[0].get('endDate', '')[:10] if sprints[0].get('endDate') else None
+
+    # Fetch sprint issues for velocity chart (B4 issues only)
+    sprint_issues = []
+    url_search = 'https://getnexar.atlassian.net/rest/api/3/search/jql'
+    jql = f'sprint = {active_sprint_id} AND (summary ~ "B4" OR labels = Beam4k) AND issuetype in (Task, Story, Bug)'
+    params = {'jql': jql, 'maxResults': 100, 'fields': 'summary,status,issuetype,resolutiondate,created'}
+    response = requests.get(url_search, auth=auth, params=params)
+    if response.status_code == 200:
+        for issue in response.json().get('issues', []):
+            fields = issue['fields']
+            sprint_issues.append({
+                'key': issue['key'],
+                'summary': fields.get('summary', '')[:60],
+                'status': fields.get('status', {}).get('name', ''),
+                'type': fields.get('issuetype', {}).get('name', ''),
+                'resolved': fields.get('resolutiondate', '')[:10] if fields.get('resolutiondate') else None,
+                'created': fields.get('created', '')[:10] if fields.get('created') else None
+            })
 
     # Fetch P1 issues first, then P2 if needed (B4 issues only, exclude Dropped)
     url = 'https://getnexar.atlassian.net/rest/api/3/search/jql'
@@ -246,7 +267,14 @@ def fetch_top_priorities(auth):
                     'url': f"https://getnexar.atlassian.net/browse/{issue['key']}"
                 })
 
-    return priorities[:5]
+    return {
+        'priorities': priorities[:5],
+        'sprint_id': active_sprint_id,
+        'sprint_name': active_sprint_name,
+        'sprint_start': sprint_start,
+        'sprint_end': sprint_end,
+        'sprint_issues': sprint_issues
+    }
 
 
 def fetch_velocity_data(auth):
@@ -260,8 +288,8 @@ def fetch_velocity_data(auth):
     # Get initial counts (before our 8-week window)
     first_week_start = today - timedelta(weeks=7, days=today.weekday())
 
-    # Initial open tickets
-    jql = f'project = FS AND labels = Beam4k AND status not in (Done, Closed) AND created < "{first_week_start.strftime("%Y-%m-%d")}"'
+    # Initial open tickets (Task, Story, Bug only - exclude New, Backlog)
+    jql = f'project = FS AND labels = Beam4k AND issuetype in (Task, Story, Bug) AND status not in (Done, Closed, New, Backlog) AND created < "{first_week_start.strftime("%Y-%m-%d")}"'
     params = {'jql': jql, 'maxResults': 200, 'fields': 'key'}
     response = requests.get(url, auth=auth, params=params)
     initial_open = len(response.json().get('issues', [])) if response.status_code == 200 else 0
@@ -360,8 +388,22 @@ def main():
 
     # Fetch top priorities from active sprint
     print("Fetching top priorities...")
-    priorities = fetch_top_priorities(auth)
-    print(f"  Found {len(priorities)} priorities")
+    priorities_result = fetch_top_priorities(auth)
+    if isinstance(priorities_result, dict):
+        priorities = priorities_result['priorities']
+        active_sprint_id = priorities_result['sprint_id']
+        active_sprint_name = priorities_result['sprint_name']
+        sprint_start = priorities_result.get('sprint_start')
+        sprint_end = priorities_result.get('sprint_end')
+        sprint_issues = priorities_result.get('sprint_issues', [])
+    else:
+        priorities = priorities_result
+        active_sprint_id = None
+        active_sprint_name = None
+        sprint_start = None
+        sprint_end = None
+        sprint_issues = []
+    print(f"  Found {len(priorities)} priorities, {len(sprint_issues)} sprint issues")
 
     # Calculate metrics
     status_counts = get_status_counts(tickets)
@@ -392,6 +434,12 @@ def main():
         'velocity': velocity_result['data'],
         'initial_open': velocity_result['initial_open'],
         'initial_bugs': velocity_result['initial_bugs'],
+        'sprint_data': {
+            'name': active_sprint_name,
+            'start': sprint_start,
+            'end': sprint_end,
+            'issues': sprint_issues
+        },
         'bugs': bugs,
         'tickets': tickets,
         'metrics': {
@@ -419,7 +467,9 @@ def main():
             'gh_sdk': 'https://github.com/getnexar/nexar-client-sdk',
             'gh_hub': 'https://github.com/nexarieh/b4-project-hub',
             'gh_my_prs': 'https://github.com/pulls?q=is%3Aopen+is%3Apr+author%3Anexarieh+org%3Agetnexar',
-            'gh_review_prs': 'https://github.com/pulls?q=is%3Aopen+is%3Apr+review-requested%3Anexarieh+org%3Agetnexar'
+            'gh_review_prs': 'https://github.com/pulls?q=is%3Aopen+is%3Apr+review-requested%3Anexarieh+org%3Agetnexar',
+            'active_sprint': f'https://getnexar.atlassian.net/jira/software/c/projects/FS/boards/268?selectedIssue=&sprint={active_sprint_id}' if active_sprint_id else None,
+            'active_sprint_name': active_sprint_name
         }
     }
 
