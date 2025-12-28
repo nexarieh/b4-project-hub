@@ -1,5 +1,5 @@
 {
-  "updated": "2025-12-11T02:14:20.892656",
+  "updated": "2025-12-28T17:04:35.109186",
   "project": {
     "name": "Beam4K (B4)",
     "phase": "Field Test 3 / MVP Development",
@@ -7,38 +7,8 @@
   },
   "milestones": [
     {
-      "name": "DVT signoff",
-      "status": "done",
-      "date": "2025-09-08"
-    },
-    {
-      "name": "PVT 0.5",
-      "status": "done",
-      "date": "2025-09-29"
-    },
-    {
-      "name": "PVT 1.0",
-      "status": "done",
-      "date": "2025-10-20"
-    },
-    {
-      "name": "Initial FT",
-      "status": "done",
-      "date": "2025-11-17"
-    },
-    {
-      "name": "Field Test 2",
-      "status": "done",
-      "date": "2025-12-03"
-    },
-    {
-      "name": "Field Test 3",
-      "status": "in_progress",
-      "date": "2025-12-11"
-    },
-    {
-      "name": "PVT sign-off",
-      "status": "blocked",
+      "name": "Full Product",
+      "status": "backlog",
       "date": "TBD"
     },
     {
@@ -47,47 +17,91 @@
       "date": "2026-01-02"
     },
     {
-      "name": "Full Product",
-      "status": "backlog",
+      "name": "PVT sign-off",
+      "status": "blocked",
       "date": "TBD"
     },
     {
-      "name": "",
-      "status": "empty",
-      "date": ""
+      "name": "Field Test 3",
+      "status": "in_progress",
+      "date": "2025-12-11"
     },
     {
-      "name": "",
-      "status": "empty",
-      "date": ""
+      "name": "Field Test 2",
+      "status": "done",
+      "date": "2025-12-03"
+    },
+    {
+      "name": "Initial FT",
+      "status": "done",
+      "date": "2025-11-17"
+    },
+    {
+      "name": "PVT 1.0",
+      "status": "done",
+      "date": "2025-10-20"
+    },
+    {
+      "name": "PVT 0.5",
+      "status": "done",
+      "date": "2025-09-29"
+    },
+    {
+      "name": "DVT signoff",
+      "status": "done",
+      "date": "2025-09-08"
     }
   ],
   "priorities": [
     {
-      "title": "FT Readiness: OBD issue",
-      "ticket": "TBD"
+      "title": "[B4] non working url resolution on release",
+      "ticket": "FS-3459",
+      "priority": "P1 - High",
+      "url": "https://getnexar.atlassian.net/browse/FS-3459"
     },
     {
-      "title": "MVP: Remote stream bugs",
-      "ticket": "FS-3375"
+      "title": "[B4] Integarte latest MCU version into FW2",
+      "ticket": "FS-3415",
+      "priority": "P1 - High",
+      "url": "https://getnexar.atlassian.net/browse/FS-3415"
     },
     {
-      "title": "MVP: Encryption",
-      "ticket": "FS-3283"
+      "title": "[B4] Camera crops secondary resolutions",
+      "ticket": "FS-3395",
+      "priority": "P1 - High",
+      "url": "https://getnexar.atlassian.net/browse/FS-3395"
     },
     {
-      "title": "MVP: HTTP Server \"Teepee\"",
-      "ticket": "FS-2677"
+      "title": "[B4] Encrypt Recorded Video Files on SD Card",
+      "ticket": "FS-3283",
+      "priority": "P1 - High",
+      "url": "https://getnexar.atlassian.net/browse/FS-3283"
     },
     {
-      "title": "Integrate new Logstore",
-      "ticket": "FS-3322"
+      "title": "[B4][MCU] Aux protection mode support",
+      "ticket": "FS-3194",
+      "priority": "P1 - High",
+      "url": "https://getnexar.atlassian.net/browse/FS-3194"
     }
   ],
-  "releases": [
+  "fw_releases": [
     {
-      "name": "fw2-b4-v7.4.60 (MVP1)",
+      "name": "fw2-b4-v7.4.70 (MVP1)",
       "released": false,
+      "releaseDate": "2025-12-21",
+      "description": "MVP version",
+      "url": "https://getnexar.atlassian.net/projects/FS/versions/19444"
+    },
+    {
+      "name": "fw2-b4-v7.4.61 (FT final)",
+      "released": true,
+      "releaseDate": "2025-12-25",
+      "description": "FT candidate version for Chicony (For FT samples i",
+      "url": "https://getnexar.atlassian.net/projects/FS/versions/19511"
+    },
+    {
+      "name": "fw2-b4-v7.4.60 (FT Bundle)",
+      "released": true,
       "releaseDate": "2025-12-15",
       "description": "",
       "url": "https://getnexar.atlassian.net/projects/FS/versions/19311"
@@ -119,85 +133,146 @@
       "releaseDate": "2025-11-11",
       "description": "FT version (patch)",
       "url": "https://getnexar.atlassian.net/projects/FS/versions/18882"
-    },
-    {
-      "name": "fw2-b4-v7.3.50",
-      "released": true,
-      "releaseDate": "2025-11-10",
-      "description": "FT version (partition B) - Basic functionalities",
-      "url": "https://getnexar.atlassian.net/projects/FS/versions/18057"
-    },
-    {
-      "name": "fw2-b4-v1.0.2",
-      "released": true,
-      "releaseDate": "2025-10-29",
-      "description": "PVT 1.0 Patch",
-      "url": "https://getnexar.atlassian.net/projects/FS/versions/18717"
-    },
-    {
-      "name": "fw2-b4-v1.0.1",
-      "released": true,
-      "releaseDate": "2025-10-20",
-      "description": "Fix version update",
-      "url": "https://getnexar.atlassian.net/projects/FS/versions/18519"
-    },
-    {
-      "name": "fw2-b4-1.0.0",
-      "released": true,
-      "releaseDate": "2025-10-19",
-      "description": "Minimal version for PVT (Partition A):\n1. Connecti",
-      "url": "https://getnexar.atlassian.net/projects/FS/versions/16869"
-    },
-    {
-      "name": "B4 DVT sign-off",
-      "released": true,
-      "releaseDate": "2025-10-02",
-      "description": "",
-      "url": "https://getnexar.atlassian.net/projects/FS/versions/16209"
-    },
-    {
-      "name": "",
-      "released": null,
-      "releaseDate": "",
-      "description": "",
-      "url": "#"
     }
   ],
+  "mcu_releases": [
+    {
+      "name": "MCU-0x292",
+      "released": false,
+      "releaseDate": "",
+      "description": "",
+      "url": "https://getnexar.atlassian.net/projects/FS/versions/19611"
+    },
+    {
+      "name": "MCU-0x291",
+      "released": true,
+      "releaseDate": "2025-12-23",
+      "description": "MCU next version for MVP",
+      "url": "https://getnexar.atlassian.net/projects/FS/versions/19377"
+    }
+  ],
+  "velocity": [
+    {
+      "week": "11/03",
+      "resolved": 6,
+      "created": 9,
+      "bugs_resolved": 1,
+      "bugs_created": 3
+    },
+    {
+      "week": "11/10",
+      "resolved": 4,
+      "created": 5,
+      "bugs_resolved": 3,
+      "bugs_created": 5
+    },
+    {
+      "week": "11/17",
+      "resolved": 9,
+      "created": 4,
+      "bugs_resolved": 0,
+      "bugs_created": 1
+    },
+    {
+      "week": "11/24",
+      "resolved": 3,
+      "created": 4,
+      "bugs_resolved": 2,
+      "bugs_created": 3
+    },
+    {
+      "week": "12/01",
+      "resolved": 3,
+      "created": 3,
+      "bugs_resolved": 2,
+      "bugs_created": 2
+    },
+    {
+      "week": "12/08",
+      "resolved": 5,
+      "created": 2,
+      "bugs_resolved": 3,
+      "bugs_created": 2
+    },
+    {
+      "week": "12/15",
+      "resolved": 1,
+      "created": 2,
+      "bugs_resolved": 1,
+      "bugs_created": 1
+    },
+    {
+      "week": "12/22",
+      "resolved": 7,
+      "created": 8,
+      "bugs_resolved": 3,
+      "bugs_created": 6
+    }
+  ],
+  "initial_open": 57,
+  "initial_bugs": 2,
   "bugs": [
+    {
+      "key": "BR-143",
+      "summary": "[Beam4] [PVT] [FW 7.4.61] Incident incorrectly identified.",
+      "status": "In Progress",
+      "priority": "P2 - Medium",
+      "assignee": "Arieh Salomon",
+      "version": "-",
+      "url": "https://getnexar.atlassian.net/browse/BR-143"
+    },
+    {
+      "key": "BR-142",
+      "summary": "[Beam4] [PVT] [FW 7.4.61] [ACC] The camera did not turn on w",
+      "status": "To Do",
+      "priority": "P2 - Medium",
+      "assignee": "Arieh Salomon",
+      "version": "-",
+      "url": "https://getnexar.atlassian.net/browse/BR-142"
+    },
+    {
+      "key": "BR-141",
+      "summary": "[Beam4] [PVT] [FW 7.4.61] [Cabin Camera] After an incident, ",
+      "status": "To Do",
+      "priority": "P2 - Medium",
+      "assignee": "Arieh Salomon",
+      "version": "-",
+      "url": "https://getnexar.atlassian.net/browse/BR-141"
+    },
     {
       "key": "BR-137",
       "summary": "[Beam4] [PVT] [FW 7.4.53] [Cabin Camera IR] Ghost shadow app",
       "status": "To Do",
       "priority": "P2 - Medium",
       "assignee": "Unassigned",
-      "created": "2025-12-10",
+      "version": "-",
       "url": "https://getnexar.atlassian.net/browse/BR-137"
     },
     {
       "key": "BR-136",
       "summary": "[B4] - Camera wakes up and starts recording without user int",
-      "status": "New",
+      "status": "To Do",
       "priority": "P2 - Medium",
       "assignee": "Arieh Salomon",
-      "created": "2025-12-10",
+      "version": "fw2-b4-v7.4.53",
       "url": "https://getnexar.atlassian.net/browse/BR-136"
     },
     {
       "key": "BR-135",
       "summary": "[B4] - Camera stuck in continuous reboot loop (suspected MCU",
-      "status": "New",
+      "status": "In Progress",
       "priority": "P2 - Medium",
       "assignee": "Arieh Salomon",
-      "created": "2025-12-10",
+      "version": "fw2-b4-v7.4.53",
       "url": "https://getnexar.atlassian.net/browse/BR-135"
     },
     {
       "key": "BR-134",
       "summary": "[B4] artifact_replication table empty after restore process ",
-      "status": "New",
+      "status": "Pending QA",
       "priority": "P2 - Medium",
       "assignee": "Arieh Salomon",
-      "created": "2025-12-10",
+      "version": "fw2-b4-v7.4.53",
       "url": "https://getnexar.atlassian.net/browse/BR-134"
     },
     {
@@ -206,7 +281,7 @@
       "status": "To Do",
       "priority": "P2 - Medium",
       "assignee": "Unassigned",
-      "created": "2025-12-09",
+      "version": "-",
       "url": "https://getnexar.atlassian.net/browse/BR-133"
     },
     {
@@ -215,7 +290,7 @@
       "status": "To Do",
       "priority": "P2 - Medium",
       "assignee": "Unassigned",
-      "created": "2025-12-09",
+      "version": "-",
       "url": "https://getnexar.atlassian.net/browse/BR-132"
     },
     {
@@ -224,7 +299,7 @@
       "status": "To Do",
       "priority": "P2 - Medium",
       "assignee": "Unassigned",
-      "created": "2025-12-09",
+      "version": "-",
       "url": "https://getnexar.atlassian.net/browse/BR-130"
     },
     {
@@ -233,7 +308,7 @@
       "status": "In Progress",
       "priority": "P2 - Medium",
       "assignee": "Arieh Salomon",
-      "created": "2025-12-08",
+      "version": "fw2-b4-v7.4.53",
       "url": "https://getnexar.atlassian.net/browse/BR-129"
     },
     {
@@ -242,7 +317,7 @@
       "status": "To Do",
       "priority": "P2 - Medium",
       "assignee": "Unassigned",
-      "created": "2025-12-05",
+      "version": "-",
       "url": "https://getnexar.atlassian.net/browse/BR-128"
     },
     {
@@ -251,7 +326,7 @@
       "status": "To Do",
       "priority": "P2 - Medium",
       "assignee": "Unassigned",
-      "created": "2025-11-26",
+      "version": "-",
       "url": "https://getnexar.atlassian.net/browse/BR-125"
     },
     {
@@ -260,7 +335,7 @@
       "status": "To Do",
       "priority": "P2 - Medium",
       "assignee": "Unassigned",
-      "created": "2025-11-26",
+      "version": "-",
       "url": "https://getnexar.atlassian.net/browse/BR-124"
     },
     {
@@ -269,7 +344,7 @@
       "status": "New",
       "priority": "P2 - Medium",
       "assignee": "Unassigned",
-      "created": "2025-11-26",
+      "version": "-",
       "url": "https://getnexar.atlassian.net/browse/BR-123"
     },
     {
@@ -278,16 +353,16 @@
       "status": "To Do",
       "priority": "P2 - Medium",
       "assignee": "Unassigned",
-      "created": "2025-11-26",
+      "version": "-",
       "url": "https://getnexar.atlassian.net/browse/BR-122"
     },
     {
       "key": "BR-121",
       "summary": "[Beam4] [Nexar Connect] Thumbnails Missing on Drives & Clips",
-      "status": "New",
+      "status": "To Do",
       "priority": "P2 - Medium",
       "assignee": "Unassigned",
-      "created": "2025-11-26",
+      "version": "-",
       "url": "https://getnexar.atlassian.net/browse/BR-121"
     },
     {
@@ -296,7 +371,7 @@
       "status": "To Do",
       "priority": "P2 - Medium",
       "assignee": "Unassigned",
-      "created": "2025-11-22",
+      "version": "-",
       "url": "https://getnexar.atlassian.net/browse/BR-119"
     },
     {
@@ -305,146 +380,100 @@
       "status": "To Do",
       "priority": "P2 - Medium",
       "assignee": "Unassigned",
-      "created": "2025-11-22",
+      "version": "-",
       "url": "https://getnexar.atlassian.net/browse/BR-118"
     }
   ],
   "tickets": [
     {
-      "key": "FS-3332",
-      "summary": "[B4] Incident events are not visible in app or Redash",
-      "status": "New",
-      "priority": "P2 - Medium",
-      "assignee": "Unassigned",
-      "url": "https://getnexar.atlassian.net/browse/FS-3332"
-    },
-    {
-      "key": "FS-3051",
-      "summary": "[B4] HWK ACC event not suported",
-      "status": "Backlog",
-      "priority": "P2 - Medium",
-      "assignee": "Unassigned",
-      "url": "https://getnexar.atlassian.net/browse/FS-3051"
-    },
-    {
-      "key": "FS-3348",
-      "summary": "[B4] Release mode: Disable WiFi by default",
-      "status": "In Review",
-      "priority": "P2 - Medium",
-      "assignee": "Naftali Arnold",
-      "url": "https://getnexar.atlassian.net/browse/FS-3348"
-    },
-    {
-      "key": "FS-3395",
-      "summary": "[B4] Camera crops secondary resolutions",
-      "status": "In Progress",
-      "priority": "P2 - Medium",
-      "assignee": "Alessandro Di Napi",
-      "url": "https://getnexar.atlassian.net/browse/FS-3395"
-    },
-    {
-      "key": "FS-3370",
-      "summary": "[B4] video overlay: present real speed value",
-      "status": "In Review",
-      "priority": "P2 - Medium",
-      "assignee": "Alessandro Di Napi",
-      "url": "https://getnexar.atlassian.net/browse/FS-3370"
-    },
-    {
-      "key": "FS-3272",
-      "summary": "[B4] User Feedback: Sounds & LED Indicators",
-      "status": "In Progress",
-      "priority": "P2 - Medium",
-      "assignee": "Unassigned",
-      "url": "https://getnexar.atlassian.net/browse/FS-3272"
-    },
-    {
-      "key": "FS-3265",
-      "summary": "[B4] carsense: add --disable-first-ride-filter flag to ",
-      "status": "On Hold",
-      "priority": "P2 - Medium",
-      "assignee": "Arieh Salomon",
-      "url": "https://getnexar.atlassian.net/browse/FS-3265"
-    },
-    {
-      "key": "FS-3216",
-      "summary": "[B4] support all build types",
-      "status": "In Progress",
-      "priority": "P2 - Medium",
-      "assignee": "Ohad Ozer",
-      "url": "https://getnexar.atlassian.net/browse/FS-3216"
-    },
-    {
-      "key": "FS-3202",
-      "summary": "[B4] Move battery Info logic to the MCU",
-      "status": "Selected for Execution",
-      "priority": "P2 - Medium",
-      "assignee": "Nir Nitzan",
-      "url": "https://getnexar.atlassian.net/browse/FS-3202"
-    },
-    {
-      "key": "FS-3263",
-      "summary": "[B4] Enable Linux when on powered on battery",
-      "status": "Selected for Execution",
-      "priority": "P2 - Medium",
-      "assignee": "Nir Nitzan",
-      "url": "https://getnexar.atlassian.net/browse/FS-3263"
-    },
-    {
-      "key": "FS-3387",
-      "summary": "[B4] MCU Enhancements for MP (Post-PVT)",
-      "status": "Backlog",
-      "priority": "P2 - Medium",
-      "assignee": "Unassigned",
-      "url": "https://getnexar.atlassian.net/browse/FS-3387"
-    },
-    {
       "key": "FS-3207",
       "summary": "[B4] (sometimes) resetting the MCU using an SoC command",
-      "status": "Selected for Execution",
+      "status": "Backlog",
       "priority": "P2 - Medium",
       "assignee": "Nir Nitzan",
+      "version": "-",
       "url": "https://getnexar.atlassian.net/browse/FS-3207"
     },
     {
-      "key": "FS-3193",
-      "summary": "[B4] MCU Deliverables for PVT",
-      "status": "In Progress",
+      "key": "FS-2711",
+      "summary": "[B4] Wi-Fi: no P2P supported by controlling script",
+      "status": "Backlog",
       "priority": "P2 - Medium",
-      "assignee": "Nir Nitzan",
-      "url": "https://getnexar.atlassian.net/browse/FS-3193"
+      "assignee": "Arieh Salomon",
+      "version": "-",
+      "url": "https://getnexar.atlassian.net/browse/FS-2711"
     },
     {
-      "key": "FS-3384",
-      "summary": "[B4] Update LD values for parking mode",
+      "key": "FS-3261",
+      "summary": "[B4] Implement lite mode for remote streaming",
       "status": "Backlog",
       "priority": "P2 - Medium",
       "assignee": "Unassigned",
-      "url": "https://getnexar.atlassian.net/browse/FS-3384"
+      "version": "-",
+      "url": "https://getnexar.atlassian.net/browse/FS-3261"
     },
     {
-      "key": "FS-3376",
-      "summary": "[B4] Recovery partition: format `/data` /SD-card only a",
+      "key": "FS-3456",
+      "summary": "[B4] ACC CLA support in B4 is the same as Aoni, which c",
+      "status": "Backlog",
+      "priority": "P2 - Medium",
+      "assignee": "Unassigned",
+      "version": "-",
+      "url": "https://getnexar.atlassian.net/browse/FS-3456"
+    },
+    {
+      "key": "FS-3447",
+      "summary": "[B4] thumbsup crashes on boot",
       "status": "Selected for Execution",
       "priority": "P2 - Medium",
       "assignee": "Ohad Ozer",
-      "url": "https://getnexar.atlassian.net/browse/FS-3376"
+      "version": "-",
+      "url": "https://getnexar.atlassian.net/browse/FS-3447"
     },
     {
       "key": "FS-3363",
       "summary": "[B4] Camera LED goes from Red > Yellow > Solid White du",
       "status": "Selected for Execution",
       "priority": "P2 - Medium",
-      "assignee": "Alessandro Di Napi",
+      "assignee": "Naftali Arnold",
+      "version": "-",
       "url": "https://getnexar.atlassian.net/browse/FS-3363"
     },
     {
-      "key": "FS-3322",
-      "summary": "[B4] Integrate LogStore Service into SDK (systemd)",
+      "key": "FS-3376",
+      "summary": "[B4] Recovery partition: format `/data` /SD-card only a",
       "status": "In Progress",
       "priority": "P2 - Medium",
-      "assignee": "Ohad Ozer",
-      "url": "https://getnexar.atlassian.net/browse/FS-3322"
+      "assignee": "Naftali Arnold",
+      "version": "-",
+      "url": "https://getnexar.atlassian.net/browse/FS-3376"
+    },
+    {
+      "key": "FS-3269",
+      "summary": "[B4] Profiling & Performance Benchmarking",
+      "status": "In Progress",
+      "priority": "P2 - Medium",
+      "assignee": "Alon Mozes",
+      "version": "-",
+      "url": "https://getnexar.atlassian.net/browse/FS-3269"
+    },
+    {
+      "key": "FS-3430",
+      "summary": "[B4] GPS Speed not getting fix even if GPS has it",
+      "status": "In Progress",
+      "priority": "P2 - Medium",
+      "assignee": "Alessandro Di Napi",
+      "version": "-",
+      "url": "https://getnexar.atlassian.net/browse/FS-3430"
+    },
+    {
+      "key": "FS-3408",
+      "summary": "[B4] Modify IMU driver to fix false IMU_ANY wakeups",
+      "status": "Selected for Execution",
+      "priority": "P2 - Medium",
+      "assignee": "Unassigned",
+      "version": "-",
+      "url": "https://getnexar.atlassian.net/browse/FS-3408"
     },
     {
       "key": "FS-2926",
@@ -452,103 +481,17 @@
       "status": "In Progress",
       "priority": "P2 - Medium",
       "assignee": "Arieh Salomon",
+      "version": "-",
       "url": "https://getnexar.atlassian.net/browse/FS-2926"
     },
     {
-      "key": "FS-3383",
-      "summary": "[B4][MCU] Make sure that an MCU OTA FW update cannot br",
-      "status": "Selected for Execution",
-      "priority": "P2 - Medium",
-      "assignee": "Nir Nitzan",
-      "url": "https://getnexar.atlassian.net/browse/FS-3383"
-    },
-    {
-      "key": "FS-3305",
-      "summary": "[B4] Reboot cycle on power-on with external power and d",
-      "status": "Dropped",
-      "priority": "P2 - Medium",
-      "assignee": "Nir Nitzan",
-      "url": "https://getnexar.atlassian.net/browse/FS-3305"
-    },
-    {
-      "key": "FS-3150",
-      "summary": "[B4] Data Backup/Restore: Process not operational yet",
-      "status": "On Hold",
-      "priority": "P2 - Medium",
-      "assignee": "Ra'anan Lori",
-      "url": "https://getnexar.atlassian.net/browse/FS-3150"
-    },
-    {
-      "key": "FS-2825",
-      "summary": "[B4] Integrate Veniam stack",
-      "status": "On Hold",
-      "priority": "P2 - Medium",
-      "assignee": "Ra'anan Lori",
-      "url": "https://getnexar.atlassian.net/browse/FS-2825"
-    },
-    {
-      "key": "FS-2493",
-      "summary": "[B4] Production flows Phase 3 - Production OTA",
+      "key": "FS-3431",
+      "summary": "[B4] MCU OTA update",
       "status": "In Progress",
       "priority": "P2 - Medium",
       "assignee": "Unassigned",
-      "url": "https://getnexar.atlassian.net/browse/FS-2493"
-    },
-    {
-      "key": "FS-3229",
-      "summary": "[B4][QA] FT/MVP Validation",
-      "status": "In Progress",
-      "priority": "P2 - Medium",
-      "assignee": "Unassigned",
-      "url": "https://getnexar.atlassian.net/browse/FS-3229"
-    },
-    {
-      "key": "FS-3245",
-      "summary": "[B4] High-priority improvements for MVP",
-      "status": "In Progress",
-      "priority": "P2 - Medium",
-      "assignee": "Ohad Ozer",
-      "url": "https://getnexar.atlassian.net/browse/FS-3245"
-    },
-    {
-      "key": "FS-2495",
-      "summary": "[B4] Stabilization and bug fixes",
-      "status": "In Progress",
-      "priority": "P2 - Medium",
-      "assignee": "Unassigned",
-      "url": "https://getnexar.atlassian.net/browse/FS-2495"
-    },
-    {
-      "key": "FS-2894",
-      "summary": "[B4] General Improvements",
-      "status": "In Progress",
-      "priority": "P2 - Medium",
-      "assignee": "Unassigned",
-      "url": "https://getnexar.atlassian.net/browse/FS-2894"
-    },
-    {
-      "key": "FS-3247",
-      "summary": "[B4] Recording & Streaming \u2013 Finalization and Bug Fixes",
-      "status": "In Progress",
-      "priority": "P2 - Medium",
-      "assignee": "Unassigned",
-      "url": "https://getnexar.atlassian.net/browse/FS-3247"
-    },
-    {
-      "key": "FS-3359",
-      "summary": "[B4] Add content for B4",
-      "status": "On Hold",
-      "priority": "P2 - Medium",
-      "assignee": "Ra'anan Lori",
-      "url": "https://getnexar.atlassian.net/browse/FS-3359"
-    },
-    {
-      "key": "FS-3377",
-      "summary": "[B4] possible race condition when RFC is initiated on b",
-      "status": "New",
-      "priority": "P2 - Medium",
-      "assignee": "Ra'anan Lori",
-      "url": "https://getnexar.atlassian.net/browse/FS-3377"
+      "version": "-",
+      "url": "https://getnexar.atlassian.net/browse/FS-3431"
     },
     {
       "key": "FS-3369",
@@ -556,97 +499,269 @@
       "status": "In Progress",
       "priority": "P2 - Medium",
       "assignee": "Unassigned",
+      "version": "-",
       "url": "https://getnexar.atlassian.net/browse/FS-3369"
     },
     {
-      "key": "FS-3269",
-      "summary": "[B4] Profiling & Performance Benchmarking",
-      "status": "Selected for Execution",
+      "key": "FS-3185",
+      "summary": "[B4] PVT Validation",
+      "status": "In Progress",
       "priority": "P2 - Medium",
       "assignee": "Unassigned",
-      "url": "https://getnexar.atlassian.net/browse/FS-3269"
+      "version": "-",
+      "url": "https://getnexar.atlassian.net/browse/FS-3185"
     },
     {
-      "key": "FS-3342",
-      "summary": "[B4] Set `state->record` to current recording status in",
-      "status": "Dropped",
+      "key": "FS-3193",
+      "summary": "[B4] MCU Deliverables for PVT",
+      "status": "In Progress",
       "priority": "P2 - Medium",
-      "assignee": "Alessandro Di Napi",
-      "url": "https://getnexar.atlassian.net/browse/FS-3342"
+      "assignee": "Nir Nitzan",
+      "version": "-",
+      "url": "https://getnexar.atlassian.net/browse/FS-3193"
     },
     {
-      "key": "FS-3352",
-      "summary": "[B4] Cancel emergency notification by tapping button af",
-      "status": "Selected for Execution",
+      "key": "FS-3245",
+      "summary": "[B4] High-priority improvements for MVP",
+      "status": "In Progress",
+      "priority": "P2 - Medium",
+      "assignee": "Ohad Ozer",
+      "version": "-",
+      "url": "https://getnexar.atlassian.net/browse/FS-3245"
+    },
+    {
+      "key": "FS-3247",
+      "summary": "[B4] Recording & Streaming \u2013 Finalization and Bug Fixes",
+      "status": "In Progress",
       "priority": "P2 - Medium",
       "assignee": "Unassigned",
-      "url": "https://getnexar.atlassian.net/browse/FS-3352"
+      "version": "-",
+      "url": "https://getnexar.atlassian.net/browse/FS-3247"
+    },
+    {
+      "key": "FS-3439",
+      "summary": "[B4] MCU logs",
+      "status": "Selected for Execution",
+      "priority": "P2 - Medium",
+      "assignee": "Nir Nitzan",
+      "version": "-",
+      "url": "https://getnexar.atlassian.net/browse/FS-3439"
+    },
+    {
+      "key": "FS-3455",
+      "summary": "[B4] user_settings_manager crashes in loop on boot caus",
+      "status": "Selected for Execution",
+      "priority": "P2 - Medium",
+      "assignee": "Ohad Ozer",
+      "version": "-",
+      "url": "https://getnexar.atlassian.net/browse/FS-3455"
+    },
+    {
+      "key": "FS-3452",
+      "summary": "  [B4] IFC clips not created due to race condition in b",
+      "status": "Selected for Execution",
+      "priority": "P2 - Medium",
+      "assignee": "Ohad Ozer",
+      "version": "-",
+      "url": "https://getnexar.atlassian.net/browse/FS-3452"
+    },
+    {
+      "key": "FS-3457",
+      "summary": "[B4] Enable flipz for TinyCarSense - accelerometer axis",
+      "status": "In Review",
+      "priority": "P2 - Medium",
+      "assignee": "Arieh Salomon",
+      "version": "-",
+      "url": "https://getnexar.atlassian.net/browse/FS-3457"
+    },
+    {
+      "key": "FS-3231",
+      "summary": "[QA] Run validation test for B4 FT (Field testing)",
+      "status": "On Hold",
+      "priority": "P2 - Medium",
+      "assignee": "Alon Mozes",
+      "version": "-",
+      "url": "https://getnexar.atlassian.net/browse/FS-3231"
     },
     {
       "key": "FS-3281",
       "summary": "[B4] Camera wakes up on Audio even if audio wakeup is d",
       "status": "Selected for Execution",
       "priority": "P2 - Medium",
-      "assignee": "Alessandro Di Napi",
+      "assignee": "Nir Nitzan",
+      "version": "-",
       "url": "https://getnexar.atlassian.net/browse/FS-3281"
     },
     {
-      "key": "FS-3185",
-      "summary": "[B4] PVT Validation",
+      "key": "FS-3051",
+      "summary": "[B4] HWK ACC event not suported",
+      "status": "Selected for Execution",
+      "priority": "P2 - Medium",
+      "assignee": "Ra'anan Lori",
+      "version": "-",
+      "url": "https://getnexar.atlassian.net/browse/FS-3051"
+    },
+    {
+      "key": "FS-3438",
+      "summary": "[B4] LTE module update",
+      "status": "In Progress",
+      "priority": "P2 - Medium",
+      "assignee": "Arieh Salomon",
+      "version": "-",
+      "url": "https://getnexar.atlassian.net/browse/FS-3438"
+    },
+    {
+      "key": "FS-2807",
+      "summary": "[B4] Execute solidblue (systemd)",
+      "status": "Backlog",
+      "priority": "P2 - Medium",
+      "assignee": "Unassigned",
+      "version": "-",
+      "url": "https://getnexar.atlassian.net/browse/FS-2807"
+    },
+    {
+      "key": "FS-2985",
+      "summary": "[B4] align missing logstore content with N1/B2/B0",
+      "status": "Dropped",
+      "priority": "P2 - Medium",
+      "assignee": "Naftali Arnold",
+      "version": "-",
+      "url": "https://getnexar.atlassian.net/browse/FS-2985"
+    },
+    {
+      "key": "FS-3451",
+      "summary": "[B4] Control voltage threshold levels via LaunchDarkly",
+      "status": "Backlog",
+      "priority": "P2 - Medium",
+      "assignee": "Unassigned",
+      "version": "-",
+      "url": "https://getnexar.atlassian.net/browse/FS-3451"
+    },
+    {
+      "key": "FS-3453",
+      "summary": "[B4] Post MVP",
+      "status": "Backlog",
+      "priority": "P2 - Medium",
+      "assignee": "Unassigned",
+      "version": "-",
+      "url": "https://getnexar.atlassian.net/browse/FS-3453"
+    },
+    {
+      "key": "FS-3449",
+      "summary": "[B4] Save MCU logs to SD card",
+      "status": "Selected for Execution",
+      "priority": "P2 - Medium",
+      "assignee": "Ra'anan Lori",
+      "version": "-",
+      "url": "https://getnexar.atlassian.net/browse/FS-3449"
+    },
+    {
+      "key": "FS-3450",
+      "summary": "[B4] Upload MCU logs to S3",
+      "status": "Backlog",
+      "priority": "P2 - Medium",
+      "assignee": "Unassigned",
+      "version": "-",
+      "url": "https://getnexar.atlassian.net/browse/FS-3450"
+    },
+    {
+      "key": "FS-3448",
+      "summary": "[B4] MCU logs: collect and upload to S3",
+      "status": "Selected for Execution",
+      "priority": "P2 - Medium",
+      "assignee": "Unassigned",
+      "version": "-",
+      "url": "https://getnexar.atlassian.net/browse/FS-3448"
+    },
+    {
+      "key": "FS-3236",
+      "summary": "[B4] Improve SoC <--> MCU communication channel",
+      "status": "Selected for Execution",
+      "priority": "P2 - Medium",
+      "assignee": "Ra'anan Lori",
+      "version": "-",
+      "url": "https://getnexar.atlassian.net/browse/FS-3236"
+    },
+    {
+      "key": "FS-3377",
+      "summary": "[B4] possible race condition when RFC is initiated on b",
+      "status": "Selected for Execution",
+      "priority": "P2 - Medium",
+      "assignee": "Ra'anan Lori",
+      "version": "-",
+      "url": "https://getnexar.atlassian.net/browse/FS-3377"
+    },
+    {
+      "key": "FS-3444",
+      "summary": "[B4] Remote streaming with audio causeds video to freez",
+      "status": "Backlog",
+      "priority": "P2 - Medium",
+      "assignee": "Unassigned",
+      "version": "-",
+      "url": "https://getnexar.atlassian.net/browse/FS-3444"
+    },
+    {
+      "key": "FS-3265",
+      "summary": "[B4] carsense: add --disable-first-ride-filter flag to ",
+      "status": "On Hold",
+      "priority": "P2 - Medium",
+      "assignee": "Arieh Salomon",
+      "version": "-",
+      "url": "https://getnexar.atlassian.net/browse/FS-3265"
+    },
+    {
+      "key": "FS-2899",
+      "summary": "[B4] FW build on macOS is broken",
       "status": "Blocked",
       "priority": "P2 - Medium",
-      "assignee": "Unassigned",
-      "url": "https://getnexar.atlassian.net/browse/FS-3185"
+      "assignee": "Alessandro Di Napi",
+      "version": "-",
+      "url": "https://getnexar.atlassian.net/browse/FS-2899"
     },
     {
-      "key": "FS-3365",
-      "summary": "platform_events_bridge: IFC timer being created for sin",
-      "status": "New",
+      "key": "FS-3202",
+      "summary": "[B4] Move battery Info logic to the MCU",
+      "status": "Selected for Execution",
       "priority": "P2 - Medium",
-      "assignee": "Unassigned",
-      "url": "https://getnexar.atlassian.net/browse/FS-3365"
+      "assignee": "Nir Nitzan",
+      "version": "-",
+      "url": "https://getnexar.atlassian.net/browse/FS-3202"
     },
     {
-      "key": "FS-3331",
-      "summary": "[B4] nextBatterySavingStartTime is set to 1970-01-01T00",
-      "status": "New",
+      "key": "FS-2894",
+      "summary": "[B4] General Improvements",
+      "status": "In Progress",
       "priority": "P2 - Medium",
       "assignee": "Unassigned",
-      "url": "https://getnexar.atlassian.net/browse/FS-3331"
+      "version": "-",
+      "url": "https://getnexar.atlassian.net/browse/FS-2894"
     },
     {
-      "key": "FS-3330",
-      "summary": "[B4] Missing startupIndex key in power on/off events",
-      "status": "New",
+      "key": "FS-3418",
+      "summary": "[B4] Thumbnails still missing on Drives & Clips",
+      "status": "Backlog",
       "priority": "P2 - Medium",
       "assignee": "Unassigned",
-      "url": "https://getnexar.atlassian.net/browse/FS-3330"
-    },
-    {
-      "key": "FS-3329",
-      "summary": "[B4] Power on/off events contain incorrect version info",
-      "status": "New",
-      "priority": "P2 - Medium",
-      "assignee": "Unassigned",
-      "url": "https://getnexar.atlassian.net/browse/FS-3329"
+      "version": "-",
+      "url": "https://getnexar.atlassian.net/browse/FS-3418"
     }
   ],
   "metrics": {
-    "total_bugs": 16,
+    "total_bugs": 19,
     "total_tickets": 40,
     "bug_status": {
-      "To Do": 10,
-      "New": 5,
-      "In Progress": 1
+      "In Progress": 3,
+      "To Do": 14,
+      "Pending QA": 1,
+      "New": 1
     },
     "ticket_status": {
-      "New": 6,
-      "Backlog": 3,
-      "In Review": 2,
-      "In Progress": 13,
-      "On Hold": 4,
-      "Selected for Execution": 9,
-      "Dropped": 2,
+      "Backlog": 10,
+      "Selected for Execution": 13,
+      "In Progress": 12,
+      "In Review": 1,
+      "On Hold": 2,
+      "Dropped": 1,
       "Blocked": 1
     }
   },
@@ -658,8 +773,8 @@
     "chicony_jira": "https://nexar-chicony.atlassian.net/jira/core/projects/B4/board?filter=&groupBy=status",
     "dastic_jira": "https://nexar-chicony.atlassian.net/jira/core/projects/DAS/board?filter=&groupBy=status",
     "br_bugs": "https://getnexar.atlassian.net/jira/software/c/projects/BR/boards/287/backlog?issueParent=109691",
-    "sprint_planning": "https://getnexar.atlassian.net/wiki/spaces/EMB/pages/5111021619",
-    "sprint_title": "01/12/2025 - Sprint X WW49 Planning",
+    "sprint_planning": "https://getnexar.atlassian.net/wiki/spaces/EMB/pages/5143494660",
+    "sprint_title": "15/12/2025 - Sprint Y WW51 Planning",
     "serial_numbers": "https://docs.google.com/spreadsheets/d/1ZAwoMznI-whqYJFvrwy9SrFTTNGQiMq62E_86qvR_sw/edit?gid=243956152#gid=243956152",
     "odm_export": "https://drive.google.com/drive/folders/1lFlqGslitGcLlwvC3xXvD4WrOqcWQ6Fh",
     "slack_eng": "https://app.slack.com/client/T02KEL8KX/C0824FCA2GM",

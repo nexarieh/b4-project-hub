@@ -6,6 +6,8 @@
     <title>B4 Project Dashboard</title>
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
@@ -19,7 +21,7 @@
         h1 { color: #58a6ff; margin-bottom: 5px; }
         .subtitle { color: #8b949e; margin-bottom: 20px; }
         .main-layout { display: grid; grid-template-columns: 220px 1fr; gap: 20px; }
-        .sidebar { position: sticky; top: 20px; height: fit-content; }
+        .sidebar { height: fit-content; }
         .content-area { display: flex; flex-direction: column; gap: 20px; }
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 20px; }
         .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
@@ -161,6 +163,82 @@
         .full-width { grid-column: 1 / -1; }
         .scroll-table { max-height: 300px; overflow-y: auto; }
 
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid #21262d;
+        }
+        .pagination button {
+            background: #21262d;
+            border: 1px solid #30363d;
+            color: #c9d1d9;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        .pagination button:hover { background: #30363d; }
+        .pagination button:disabled { opacity: 0.5; cursor: not-allowed; }
+        .pagination button.active { background: #1f6feb; border-color: #1f6feb; }
+        .pagination .page-info { color: #8b949e; font-size: 13px; line-height: 32px; }
+
+        .filter-bar {
+            background: #21262d;
+            padding: 8px 12px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .filter-bar span { color: #8b949e; }
+        .filter-bar .filter-value { color: #58a6ff; font-weight: 500; }
+        .filter-bar button {
+            background: #da3633;
+            border: none;
+            color: #fff;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .clickable { cursor: pointer; }
+        .clickable:hover { text-decoration: underline; }
+        .sortable { cursor: pointer; user-select: none; }
+        .sortable:hover { background: #30363d; }
+
+        .chart-fullscreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #0d1117;
+            z-index: 1000;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .chart-fullscreen .close-btn {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            background: #da3633;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            z-index: 1001;
+        }
+        .chart-fullscreen .close-btn:hover { background: #f85149; }
+        .chart-fullscreen h2 { color: #58a6ff; margin-bottom: 20px; }
+        .chart-container { cursor: pointer; }
+        .chart-container:hover { opacity: 0.9; }
+
         #refresh-btn {
             background: #238636;
             color: #fff;
@@ -204,34 +282,55 @@
                     <!-- Releases -->
                     <div class="card">
                         <h2><a href="https://getnexar.atlassian.net/projects/FS?selectedItem=com.atlassian.jira.jira-projects-plugin%3Arelease-page&status=no-filter" target="_blank" style="color: inherit; text-decoration: none;">🚀 Releases ↗</a></h2>
-                        <div>
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Version</th>
-                                        <th>Status</th>
-                                        <th>Release Date</th>
-                                        <th>Description</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="releases-body">Loading...</tbody>
-                            </table>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                            <div>
+                                <h3 style="color: #8b949e; font-size: 12px; margin-bottom: 8px;">FW Releases</h3>
+                                <div class="scroll-table" style="max-height: 200px;">
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>Version</th>
+                                                <th>Status</th>
+                                                <th>Date</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="fw-releases-body">Loading...</tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div>
+                                <h3 style="color: #8b949e; font-size: 12px; margin-bottom: 8px;">MCU Releases</h3>
+                                <div>
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>Version</th>
+                                                <th>Status</th>
+                                                <th>Date</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="mcu-releases-body">Loading...</tbody>
+                                    </table>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
                     <!-- Milestones -->
                     <div class="card">
                         <h2>📍 Milestones</h2>
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Milestone</th>
-                                    <th>Status</th>
-                                    <th>Date</th>
-                                </tr>
-                            </thead>
-                            <tbody id="milestones">Loading...</tbody>
-                        </table>
+                        <div class="scroll-table" style="max-height: 200px;">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Milestone</th>
+                                        <th>Status</th>
+                                        <th>Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="milestones">Loading...</tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
 
@@ -250,42 +349,65 @@
                     </div>
                 </div>
 
+            </div>
+
+            <!-- Velocity Chart (full width) -->
+            <div class="card chart-container" style="margin-top: 20px; grid-column: 1 / -1;" onclick="openChartFullscreen()">
+                <h2>📈 Velocity Chart (Last 8 Weeks) <span style="font-size: 12px; color: #8b949e;">(click to expand)</span></h2>
+                <div style="height: 280px;">
+                    <canvas id="velocity-chart"></canvas>
+                </div>
+            </div>
+
+            <!-- Fullscreen Chart Overlay -->
+            <div id="chart-fullscreen" class="chart-fullscreen" style="display: none;">
+                <button class="close-btn" onclick="closeChartFullscreen()">✕ Close</button>
+                <h2>📈 Velocity Chart (Last 8 Weeks)</h2>
+                <div style="height: calc(100vh - 100px);">
+                    <canvas id="velocity-chart-full"></canvas>
+                </div>
+            </div>
+
+            <div class="content-area" style="margin-top: 0; grid-column: 1 / -1;">
+
                 <!-- BR Bugs (full width) -->
                 <div class="card">
-                    <h2>🐛 BR Bugs</h2>
-                    <div class="scroll-table" style="max-height: 400px;">
-                        <table id="bugs-table">
-                            <thead>
-                                <tr>
-                                    <th>Key</th>
-                                    <th>Summary</th>
-                                    <th>Status</th>
-                                    <th>Assignee</th>
-                                    <th>Priority</th>
-                                </tr>
-                            </thead>
-                            <tbody id="bugs-body">Loading...</tbody>
-                        </table>
-                    </div>
+                    <h2><a id="bugs-link" href="#" target="_blank" style="color: inherit; text-decoration: none;">🐛 BR Bugs (<span id="bugs-count">0</span>) ↗</a></h2>
+                    <div id="bugs-filter" class="filter-bar" style="display:none;"></div>
+                    <table id="bugs-table" style="width: 100%;">
+                        <thead>
+                            <tr>
+                                <th class="sortable" onclick="sortBugs('key')">Key <span id="bugs-sort-key"></span></th>
+                                <th class="sortable" onclick="sortBugs('summary')">Summary <span id="bugs-sort-summary"></span></th>
+                                <th class="sortable" onclick="sortBugs('status')">Status <span id="bugs-sort-status"></span></th>
+                                <th class="sortable" onclick="sortBugs('assignee')">Assignee <span id="bugs-sort-assignee"></span></th>
+                                <th class="sortable" onclick="sortBugs('priority')">Priority <span id="bugs-sort-priority"></span></th>
+                                <th class="sortable" onclick="sortBugs('version')">Version <span id="bugs-sort-version"></span></th>
+                            </tr>
+                        </thead>
+                        <tbody id="bugs-body">Loading...</tbody>
+                    </table>
+                    <div class="pagination" id="bugs-pagination"></div>
                 </div>
 
                 <!-- FS Tickets (full width) -->
                 <div class="card">
-                    <h2>📋 FS Tickets</h2>
-                    <div class="scroll-table" style="max-height: 400px;">
-                        <table id="tickets-table">
-                            <thead>
-                                <tr>
-                                    <th>Key</th>
-                                    <th>Summary</th>
-                                    <th>Status</th>
-                                    <th>Assignee</th>
-                                    <th>Priority</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tickets-body">Loading...</tbody>
-                        </table>
-                    </div>
+                    <h2><a id="tickets-link" href="#" target="_blank" style="color: inherit; text-decoration: none;">📋 FS Tickets (<span id="tickets-count">0</span>) ↗</a></h2>
+                    <div id="tickets-filter" class="filter-bar" style="display:none;"></div>
+                    <table id="tickets-table" style="width: 100%;">
+                        <thead>
+                            <tr>
+                                <th class="sortable" onclick="sortTickets('key')">Key <span id="tickets-sort-key"></span></th>
+                                <th class="sortable" onclick="sortTickets('summary')">Summary <span id="tickets-sort-summary"></span></th>
+                                <th class="sortable" onclick="sortTickets('status')">Status <span id="tickets-sort-status"></span></th>
+                                <th class="sortable" onclick="sortTickets('assignee')">Assignee <span id="tickets-sort-assignee"></span></th>
+                                <th class="sortable" onclick="sortTickets('priority')">Priority <span id="tickets-sort-priority"></span></th>
+                                <th class="sortable" onclick="sortTickets('version')">Version <span id="tickets-sort-version"></span></th>
+                            </tr>
+                        </thead>
+                        <tbody id="tickets-body">Loading...</tbody>
+                    </table>
+                    <div class="pagination" id="tickets-pagination"></div>
                 </div>
             </div>
         </div>
@@ -353,31 +475,36 @@
             `;
             document.getElementById('metrics').innerHTML = metricsHtml;
 
-            // Releases
-            const releasesHtml = (data.releases || []).map(r => {
-                if (!r.name) {
-                    return '<tr style="height:28px;"><td></td><td></td><td></td><td></td></tr>';
-                }
+            // FW Releases
+            const fwReleasesHtml = (data.fw_releases || []).map(r => {
+                if (!r.name) return '';
                 return `<tr>
-                    <td><a class="ticket-link" href="${r.url}" target="_blank">${r.name}</a></td>
-                    <td><span class="status-badge ${r.released ? 'status-done' : 'status-in_progress'}">${r.released ? 'Released' : 'Unreleased'}</span></td>
+                    <td><a class="ticket-link" href="${r.url}" target="_blank">${r.name.replace('fw2-b4-', '')}</a></td>
+                    <td><span class="status-badge ${r.released ? 'status-done' : 'status-in_progress'}">${r.released ? '✓' : '○'}</span></td>
                     <td>${r.releaseDate || '-'}</td>
-                    <td class="truncate">${r.description || ''}</td>
                 </tr>`;
             }).join('');
-            document.getElementById('releases-body').innerHTML = releasesHtml || '<tr><td colspan="4">No releases</td></tr>';
+            document.getElementById('fw-releases-body').innerHTML = fwReleasesHtml || '<tr><td colspan="3">No releases</td></tr>';
+
+            // MCU Releases
+            const mcuReleasesHtml = (data.mcu_releases || []).map(r => {
+                if (!r.name) return '';
+                return `<tr>
+                    <td><a class="ticket-link" href="${r.url}" target="_blank">${r.name.replace('mcu-b4-', '')}</a></td>
+                    <td><span class="status-badge ${r.released ? 'status-done' : 'status-in_progress'}">${r.released ? '✓' : '○'}</span></td>
+                    <td>${r.releaseDate || '-'}</td>
+                </tr>`;
+            }).join('');
+            document.getElementById('mcu-releases-body').innerHTML = mcuReleasesHtml || '<tr><td colspan="3">No MCU releases</td></tr>';
 
             // Priorities
             const prioritiesHtml = data.priorities.map((p, i) => `
                 <li class="priority-item">
                     <span><span class="priority-num">${i + 1}</span>${p.title}</span>
-                    ${p.ticket !== 'TBD'
-                        ? `<a class="priority-ticket" href="https://getnexar.atlassian.net/browse/${p.ticket}" target="_blank">${p.ticket}</a>`
-                        : '<span style="color: #8b949e">TBD</span>'
-                    }
+                    <a class="priority-ticket" href="${p.url || 'https://getnexar.atlassian.net/browse/' + p.ticket}" target="_blank">${p.ticket}</a>
                 </li>
             `).join('');
-            document.getElementById('priorities').innerHTML = prioritiesHtml;
+            document.getElementById('priorities').innerHTML = prioritiesHtml || '<li>No priorities in active sprint</li>';
 
             // Links
             const linksHtml = `
@@ -429,29 +556,114 @@
             `;
             document.getElementById('links').innerHTML = linksHtml;
 
-            // Bugs table
-            const bugsHtml = data.bugs.map(bug => `
-                <tr>
-                    <td><a class="ticket-link" href="${bug.url}" target="_blank">${bug.key}</a></td>
-                    <td class="truncate" title="${bug.summary}">${bug.summary}</td>
-                    <td><span class="status-badge status-${bug.status.toLowerCase().replace(' ', '-')}">${bug.status}</span></td>
-                    <td>${bug.assignee}</td>
-                    <td>${bug.priority || '-'}</td>
-                </tr>
-            `).join('');
-            document.getElementById('bugs-body').innerHTML = bugsHtml || '<tr><td colspan="5">No bugs</td></tr>';
+            // Bugs table with pagination
+            window.bugsData = data.bugs;
+            window.bugsPage = 1;
+            window.bugsPerPage = 10;
+            document.getElementById('bugs-count').textContent = data.bugs.length;
+            document.getElementById('bugs-link').href = data.links.br_bugs;
+            renderBugsPage();
 
-            // Tickets table
-            const ticketsHtml = data.tickets.slice(0, 40).map(t => `
-                <tr>
-                    <td><a class="ticket-link" href="${t.url}" target="_blank">${t.key}</a></td>
-                    <td class="truncate" title="${t.summary}">${t.summary}</td>
-                    <td><span class="status-badge status-${t.status.toLowerCase().replace(' ', '-')}">${t.status}</span></td>
-                    <td>${t.assignee}</td>
-                    <td>${t.priority || '-'}</td>
-                </tr>
-            `).join('');
-            document.getElementById('tickets-body').innerHTML = ticketsHtml || '<tr><td colspan="5">No tickets</td></tr>';
+            // Tickets table with pagination
+            window.ticketsData = data.tickets;
+            window.ticketsPage = 1;
+            window.ticketsPerPage = 10;
+            document.getElementById('tickets-count').textContent = data.tickets.length;
+            document.getElementById('tickets-link').href = data.links.jira_board;
+            renderTicketsPage();
+
+            // Velocity Chart - Cumulative
+            if (data.velocity && data.velocity.length > 0) {
+                // Store data for fullscreen chart
+                window.lastVelocityData = data;
+
+                const ctx = document.getElementById('velocity-chart').getContext('2d');
+                // Destroy existing chart if any
+                if (window.velocityChart) window.velocityChart.destroy();
+
+                // Calculate cumulative values
+                let cumResolved = 0, cumCreated = 0;
+                const cumulativeResolved = data.velocity.map(v => { cumResolved += v.resolved; return cumResolved; });
+                cumCreated = 0;
+                const cumulativeCreated = data.velocity.map(v => { cumCreated += v.created; return cumCreated; });
+
+                // Open bugs at each week (starting from initial_bugs)
+                let openBugs = data.initial_bugs || 0;
+                const openBugsLine = data.velocity.map(v => {
+                    openBugs += (v.bugs_created || 0) - (v.bugs_resolved || 0);
+                    return openBugs;
+                });
+
+                // Velocity trend line (positive slope showing cumulative at avg rate)
+                const totalResolved = data.velocity.reduce((sum, v) => sum + v.resolved, 0);
+                const avgVelocity = totalResolved / data.velocity.length;
+                const velocityTrendLine = data.velocity.map((v, i) => avgVelocity * (i + 1));
+
+                window.velocityChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: data.velocity.map(v => v.week),
+                        datasets: [
+                            {
+                                label: 'Open Bugs',
+                                data: openBugsLine,
+                                borderColor: '#da3633',
+                                backgroundColor: 'rgba(218, 54, 51, 0.1)',
+                                fill: true,
+                                tension: 0.3,
+                                borderWidth: 2
+                            },
+                            {
+                                label: `Velocity Trend (${avgVelocity.toFixed(1)}/wk)`,
+                                data: velocityTrendLine,
+                                borderColor: 'rgba(255, 255, 255, 0.4)',
+                                borderDash: [5, 5],
+                                backgroundColor: 'transparent',
+                                fill: false,
+                                tension: 0,
+                                borderWidth: 2,
+                                pointRadius: 0,
+                                datalabels: { display: false }
+                            },
+                            {
+                                label: 'Resolved (cumulative)',
+                                data: cumulativeResolved,
+                                borderColor: '#238636',
+                                backgroundColor: 'rgba(35, 134, 54, 0.1)',
+                                fill: true,
+                                tension: 0.3
+                            },
+                            {
+                                label: 'Created (cumulative)',
+                                data: cumulativeCreated,
+                                borderColor: '#1f6feb',
+                                backgroundColor: 'rgba(31, 111, 235, 0.1)',
+                                fill: true,
+                                tension: 0.3
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { reverse: true, labels: { color: '#8b949e' } },
+                            datalabels: {
+                                display: (ctx) => ctx.dataIndex % 2 === 1,
+                                color: '#c9d1d9',
+                                font: { size: 10 },
+                                anchor: 'end',
+                                align: 'top'
+                            }
+                        },
+                        scales: {
+                            x: { ticks: { color: '#8b949e' }, grid: { color: '#21262d' } },
+                            y: { ticks: { color: '#8b949e' }, grid: { color: '#21262d' }, beginAtZero: true }
+                        }
+                    },
+                    plugins: [ChartDataLabels]
+                });
+            }
 
             // Updated timestamp
             const updated = new Date(data.updated);
@@ -481,6 +693,228 @@
                     btn.classList.remove('loading');
                 }, 2000);
             }
+        }
+
+        function renderBugsPage() {
+            // Apply filter if set
+            let filteredData = window.bugsData;
+            if (window.bugsFilter) {
+                filteredData = window.bugsData.filter(b => b[window.bugsFilter.field] === window.bugsFilter.value);
+                document.getElementById('bugs-filter').style.display = 'flex';
+                document.getElementById('bugs-filter').innerHTML = `<span>Filtered by:</span> <span class="filter-value">${window.bugsFilter.field} = "${window.bugsFilter.value}"</span> <button onclick="clearBugsFilter()">✕ Clear</button>`;
+            } else {
+                document.getElementById('bugs-filter').style.display = 'none';
+            }
+
+            const start = (window.bugsPage - 1) * window.bugsPerPage;
+            const end = start + window.bugsPerPage;
+            const pageData = filteredData.slice(start, end);
+            const totalPages = Math.ceil(filteredData.length / window.bugsPerPage) || 1;
+
+            const html = pageData.map(bug => `
+                <tr>
+                    <td><a class="ticket-link" href="${bug.url}" target="_blank">${bug.key}</a></td>
+                    <td class="truncate" title="${bug.summary}">${bug.summary}</td>
+                    <td><span class="status-badge status-${bug.status.toLowerCase().replace(' ', '-')} clickable" onclick="filterBugs('status','${bug.status}')">${bug.status}</span></td>
+                    <td class="clickable" onclick="filterBugs('assignee','${bug.assignee}')">${bug.assignee}</td>
+                    <td class="clickable" onclick="filterBugs('priority','${bug.priority || '-'}')">${bug.priority || '-'}</td>
+                    <td class="clickable" onclick="filterBugs('version','${bug.version || '-'}')">${bug.version || '-'}</td>
+                </tr>
+            `).join('');
+            document.getElementById('bugs-body').innerHTML = html || '<tr><td colspan="6">No bugs</td></tr>';
+
+            let paginationHtml = `<button onclick="window.bugsPage=1; renderBugsPage()" ${window.bugsPage === 1 ? 'disabled' : ''}>&laquo;</button>`;
+            paginationHtml += `<button onclick="window.bugsPage--; renderBugsPage()" ${window.bugsPage === 1 ? 'disabled' : ''}>&lsaquo; Prev</button>`;
+            paginationHtml += `<span class="page-info">${window.bugsPage} / ${totalPages} (${filteredData.length})</span>`;
+            paginationHtml += `<button onclick="window.bugsPage++; renderBugsPage()" ${window.bugsPage >= totalPages ? 'disabled' : ''}>Next &rsaquo;</button>`;
+            paginationHtml += `<button onclick="window.bugsPage=${totalPages}; renderBugsPage()" ${window.bugsPage >= totalPages ? 'disabled' : ''}>&raquo;</button>`;
+            document.getElementById('bugs-pagination').innerHTML = paginationHtml;
+        }
+
+        function filterBugs(field, value) {
+            window.bugsFilter = { field, value };
+            window.bugsPage = 1;
+            renderBugsPage();
+        }
+
+        function clearBugsFilter() {
+            window.bugsFilter = null;
+            window.bugsPage = 1;
+            renderBugsPage();
+        }
+
+        function sortBugs(field) {
+            // Toggle sort direction
+            if (window.bugsSortField === field) {
+                window.bugsSortDir = window.bugsSortDir === 'asc' ? 'desc' : 'asc';
+            } else {
+                window.bugsSortField = field;
+                window.bugsSortDir = 'asc';
+            }
+
+            // Sort data
+            window.bugsData.sort((a, b) => {
+                let valA = (a[field] || '').toString().toLowerCase();
+                let valB = (b[field] || '').toString().toLowerCase();
+                if (valA < valB) return window.bugsSortDir === 'asc' ? -1 : 1;
+                if (valA > valB) return window.bugsSortDir === 'asc' ? 1 : -1;
+                return 0;
+            });
+
+            // Update sort indicators
+            ['key','summary','status','assignee','priority','version'].forEach(f => {
+                document.getElementById('bugs-sort-' + f).textContent = '';
+            });
+            document.getElementById('bugs-sort-' + field).textContent = window.bugsSortDir === 'asc' ? '▲' : '▼';
+
+            window.bugsPage = 1;
+            renderBugsPage();
+        }
+
+        function renderTicketsPage() {
+            // Apply filter if set
+            let filteredData = window.ticketsData;
+            if (window.ticketsFilter) {
+                filteredData = window.ticketsData.filter(t => t[window.ticketsFilter.field] === window.ticketsFilter.value);
+                document.getElementById('tickets-filter').style.display = 'flex';
+                document.getElementById('tickets-filter').innerHTML = `<span>Filtered by:</span> <span class="filter-value">${window.ticketsFilter.field} = "${window.ticketsFilter.value}"</span> <button onclick="clearTicketsFilter()">✕ Clear</button>`;
+            } else {
+                document.getElementById('tickets-filter').style.display = 'none';
+            }
+
+            const start = (window.ticketsPage - 1) * window.ticketsPerPage;
+            const end = start + window.ticketsPerPage;
+            const pageData = filteredData.slice(start, end);
+            const totalPages = Math.ceil(filteredData.length / window.ticketsPerPage) || 1;
+
+            const html = pageData.map(t => `
+                <tr>
+                    <td><a class="ticket-link" href="${t.url}" target="_blank">${t.key}</a></td>
+                    <td class="truncate" title="${t.summary}">${t.summary}</td>
+                    <td><span class="status-badge status-${t.status.toLowerCase().replace(' ', '-')} clickable" onclick="filterTickets('status','${t.status}')">${t.status}</span></td>
+                    <td class="clickable" onclick="filterTickets('assignee','${t.assignee}')">${t.assignee}</td>
+                    <td class="clickable" onclick="filterTickets('priority','${t.priority || '-'}')">${t.priority || '-'}</td>
+                    <td class="clickable" onclick="filterTickets('version','${t.version || '-'}')">${t.version || '-'}</td>
+                </tr>
+            `).join('');
+            document.getElementById('tickets-body').innerHTML = html || '<tr><td colspan="6">No tickets</td></tr>';
+
+            // Pagination controls
+            let paginationHtml = `<button onclick="window.ticketsPage=1; renderTicketsPage()" ${window.ticketsPage === 1 ? 'disabled' : ''}>&laquo;</button>`;
+            paginationHtml += `<button onclick="window.ticketsPage--; renderTicketsPage()" ${window.ticketsPage === 1 ? 'disabled' : ''}>&lsaquo; Prev</button>`;
+            paginationHtml += `<span class="page-info">${window.ticketsPage} / ${totalPages} (${filteredData.length})</span>`;
+            paginationHtml += `<button onclick="window.ticketsPage++; renderTicketsPage()" ${window.ticketsPage >= totalPages ? 'disabled' : ''}>Next &rsaquo;</button>`;
+            paginationHtml += `<button onclick="window.ticketsPage=${totalPages}; renderTicketsPage()" ${window.ticketsPage >= totalPages ? 'disabled' : ''}>&raquo;</button>`;
+            document.getElementById('tickets-pagination').innerHTML = paginationHtml;
+        }
+
+        function filterTickets(field, value) {
+            window.ticketsFilter = { field, value };
+            window.ticketsPage = 1;
+            renderTicketsPage();
+        }
+
+        function clearTicketsFilter() {
+            window.ticketsFilter = null;
+            window.ticketsPage = 1;
+            renderTicketsPage();
+        }
+
+        function openChartFullscreen() {
+            document.getElementById('chart-fullscreen').style.display = 'block';
+            document.body.style.overflow = 'hidden';
+            renderFullscreenChart();
+        }
+
+        function closeChartFullscreen() {
+            document.getElementById('chart-fullscreen').style.display = 'none';
+            document.body.style.overflow = '';
+            if (window.velocityChartFull) {
+                window.velocityChartFull.destroy();
+                window.velocityChartFull = null;
+            }
+        }
+
+        function renderFullscreenChart() {
+            if (!window.lastVelocityData) return;
+            const data = window.lastVelocityData;
+            const ctx = document.getElementById('velocity-chart-full').getContext('2d');
+
+            if (window.velocityChartFull) window.velocityChartFull.destroy();
+
+            // Same chart config as main chart
+            let cumResolved = 0, cumCreated = 0;
+            const cumulativeResolved = data.velocity.map(v => { cumResolved += v.resolved; return cumResolved; });
+            const cumulativeCreated = data.velocity.map(v => { cumCreated += v.created; return cumCreated; });
+
+            let openBugs = data.initial_bugs || 0;
+            const openBugsLine = data.velocity.map(v => {
+                openBugs += (v.bugs_created || 0) - (v.bugs_resolved || 0);
+                return openBugs;
+            });
+
+            const totalResolved = data.velocity.reduce((sum, v) => sum + v.resolved, 0);
+            const avgVelocity = totalResolved / data.velocity.length;
+            const velocityTrendLine = data.velocity.map((v, i) => avgVelocity * (i + 1));
+
+            window.velocityChartFull = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.velocity.map(v => v.week),
+                    datasets: [
+                        { label: 'Open Bugs', data: openBugsLine, borderColor: '#da3633', backgroundColor: 'rgba(218, 54, 51, 0.1)', fill: true, tension: 0.3, borderWidth: 3 },
+                        { label: `Velocity Trend (${avgVelocity.toFixed(1)}/wk)`, data: velocityTrendLine, borderColor: 'rgba(255, 255, 255, 0.4)', borderDash: [5, 5], backgroundColor: 'transparent', fill: false, tension: 0, borderWidth: 2, pointRadius: 0, datalabels: { display: false } },
+                        { label: 'Resolved (cumulative)', data: cumulativeResolved, borderColor: '#238636', backgroundColor: 'rgba(35, 134, 54, 0.1)', fill: true, tension: 0.3, borderWidth: 3 },
+                        { label: 'Created (cumulative)', data: cumulativeCreated, borderColor: '#1f6feb', backgroundColor: 'rgba(31, 111, 235, 0.1)', fill: true, tension: 0.3, borderWidth: 3 }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { reverse: true, labels: { color: '#c9d1d9', font: { size: 14 } } },
+                        datalabels: { display: (ctx) => ctx.dataIndex % 2 === 1, color: '#c9d1d9', font: { size: 12 }, anchor: 'end', align: 'top' }
+                    },
+                    scales: {
+                        x: { ticks: { color: '#c9d1d9', font: { size: 14 } }, grid: { color: '#21262d' } },
+                        y: { ticks: { color: '#c9d1d9', font: { size: 14 } }, grid: { color: '#21262d' }, beginAtZero: true }
+                    }
+                },
+                plugins: [ChartDataLabels]
+            });
+        }
+
+        // Handle Escape key to close fullscreen
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeChartFullscreen();
+        });
+
+        function sortTickets(field) {
+            // Toggle sort direction
+            if (window.ticketsSortField === field) {
+                window.ticketsSortDir = window.ticketsSortDir === 'asc' ? 'desc' : 'asc';
+            } else {
+                window.ticketsSortField = field;
+                window.ticketsSortDir = 'asc';
+            }
+
+            // Sort data
+            window.ticketsData.sort((a, b) => {
+                let valA = (a[field] || '').toString().toLowerCase();
+                let valB = (b[field] || '').toString().toLowerCase();
+                if (valA < valB) return window.ticketsSortDir === 'asc' ? -1 : 1;
+                if (valA > valB) return window.ticketsSortDir === 'asc' ? 1 : -1;
+                return 0;
+            });
+
+            // Update sort indicators
+            ['key','summary','status','assignee','priority','version'].forEach(f => {
+                document.getElementById('tickets-sort-' + f).textContent = '';
+            });
+            document.getElementById('tickets-sort-' + field).textContent = window.ticketsSortDir === 'asc' ? '▲' : '▼';
+
+            window.ticketsPage = 1;
+            renderTicketsPage();
         }
 
         loadDashboard();

@@ -71,44 +71,56 @@ def fetch_latest_sprint_page(auth):
 
 
 def fetch_releases(auth):
-    """Fetch releases from JIRA FS project."""
+    """Fetch FW and MCU releases from JIRA FS project."""
+    import re
+
     url = 'https://getnexar.atlassian.net/rest/api/3/project/FS/versions'
     response = requests.get(url, auth=auth)
 
     if response.status_code != 200:
-        return []
+        return [], []
 
     versions = response.json()
 
-    # Filter for B4/Beam4 releases and sort by release date desc
-    releases = []
+    fw_releases = []
+    mcu_releases = []
+
     for v in versions:
         name = v.get('name', '')
-        # Include B4/Beam4 versions or recent fw2-b4 versions
-        if 'b4' in name.lower() or 'beam4' in name.lower():
-            releases.append({
-                'name': name,
-                'released': v.get('released', False),
-                'releaseDate': v.get('releaseDate', ''),
-                'description': v.get('description', '')[:50] if v.get('description') else '',
-                'url': f"https://getnexar.atlassian.net/projects/FS/versions/{v.get('id')}"
-            })
+        release_data = {
+            'name': name,
+            'released': v.get('released', False),
+            'releaseDate': v.get('releaseDate', ''),
+            'description': v.get('description', '')[:50] if v.get('description') else '',
+            'url': f"https://getnexar.atlassian.net/projects/FS/versions/{v.get('id')}"
+        }
 
-    # Sort by version number (highest first)
-    import re
-    def version_key(r):
+        # Categorize releases
+        name_lower = name.lower()
+        if name_lower.startswith('mcu-'):
+            mcu_releases.append(release_data)
+        elif 'fw2-b4' in name_lower or 'b4 dvt' in name_lower:
+            fw_releases.append(release_data)
+
+    def fw_version_key(r):
         # Extract version number like 7.4.60 from "fw2-b4-v7.4.60"
         match = re.search(r'v?(\d+)\.(\d+)\.(\d+)', r['name'])
         if match:
             return (int(match.group(1)), int(match.group(2)), int(match.group(3)))
         return (0, 0, 0)
 
-    releases.sort(key=version_key, reverse=True)
-    # Match milestone count (11 rows)
-    result = releases[:11]
-    while len(result) < 11:
-        result.append({'name': '', 'released': None, 'releaseDate': '', 'description': '', 'url': '#'})
-    return result
+    def mcu_version_key(r):
+        # Extract hex version like 0x291 from "MCU-0x291"
+        match = re.search(r'0x([0-9a-fA-F]+)', r['name'])
+        if match:
+            return int(match.group(1), 16)
+        return 0
+
+    # Sort and limit to 5 each
+    fw_releases.sort(key=fw_version_key, reverse=True)
+    mcu_releases.sort(key=mcu_version_key, reverse=True)
+
+    return fw_releases[:7], mcu_releases[:7]
 
 
 def fetch_jira_issues(auth, jql, max_results=50):
@@ -117,7 +129,7 @@ def fetch_jira_issues(auth, jql, max_results=50):
     params = {
         'jql': jql,
         'maxResults': max_results,
-        'fields': 'summary,status,priority,assignee,created,updated,fixVersions,labels'
+        'fields': 'summary,status,priority,assignee,created,updated,fixVersions,versions,labels'
     }
 
     response = requests.get(url, auth=auth, params=params)
@@ -134,13 +146,16 @@ def fetch_b4_bugs(auth):
     bugs = []
     for issue in issues:
         fields = issue['fields']
+        # Get affected versions (version found)
+        versions = fields.get('versions', [])
+        version_found = versions[0].get('name', '-') if versions else '-'
         bugs.append({
             'key': issue['key'],
             'summary': fields.get('summary', '')[:60],
             'status': fields.get('status', {}).get('name', 'Unknown'),
             'priority': fields.get('priority', {}).get('name', 'Unknown') if fields.get('priority') else 'Unknown',
             'assignee': fields.get('assignee', {}).get('displayName', 'Unassigned') if fields.get('assignee') else 'Unassigned',
-            'created': fields.get('created', '')[:10],
+            'version': version_found,
             'url': f"https://getnexar.atlassian.net/browse/{issue['key']}"
         })
 
@@ -155,12 +170,16 @@ def fetch_fs_tickets(auth):
     tickets = []
     for issue in issues:
         fields = issue['fields']
+        # Get affected versions (version discovered)
+        versions = fields.get('versions', [])
+        version_discovered = versions[0].get('name', '-') if versions else '-'
         tickets.append({
             'key': issue['key'],
             'summary': fields.get('summary', '')[:55],
             'status': fields.get('status', {}).get('name', 'Unknown'),
             'priority': fields.get('priority', {}).get('name', 'Unknown') if fields.get('priority') else 'Unknown',
             'assignee': fields.get('assignee', {}).get('displayName', 'Unassigned') if fields.get('assignee') else 'Unassigned',
+            'version': version_discovered,
             'url': f"https://getnexar.atlassian.net/browse/{issue['key']}"
         })
 
@@ -174,6 +193,123 @@ def get_status_counts(tickets):
         status = t['status']
         counts[status] = counts.get(status, 0) + 1
     return counts
+
+
+def fetch_top_priorities(auth):
+    """Fetch top 5 priority issues from active sprint on FS board."""
+    # FS board ID is 268
+    board_id = 268
+
+    # Get active sprint
+    url = f'https://getnexar.atlassian.net/rest/agile/1.0/board/{board_id}/sprint?state=active'
+    response = requests.get(url, auth=auth)
+
+    if response.status_code != 200:
+        return []
+
+    sprints = response.json().get('values', [])
+    if not sprints:
+        return []
+
+    active_sprint_id = sprints[0]['id']
+
+    # Fetch P1 issues first, then P2 if needed (B4 issues only, exclude Dropped)
+    url = 'https://getnexar.atlassian.net/rest/api/3/search/jql'
+    priorities = []
+
+    # Get P1 issues first
+    jql = f'sprint = {active_sprint_id} AND (summary ~ "B4" OR labels = Beam4k) AND priority = "P1 - High" AND status not in (Done, Closed, Dropped) ORDER BY created DESC'
+    params = {'jql': jql, 'maxResults': 5, 'fields': 'summary,priority'}
+    response = requests.get(url, auth=auth, params=params)
+    if response.status_code == 200:
+        for issue in response.json().get('issues', []):
+            fields = issue['fields']
+            priorities.append({
+                'title': fields.get('summary', '')[:50],
+                'ticket': issue['key'],
+                'priority': fields.get('priority', {}).get('name', ''),
+                'url': f"https://getnexar.atlassian.net/browse/{issue['key']}"
+            })
+
+    # If we don't have 5 yet, get P2 issues
+    if len(priorities) < 5:
+        jql = f'sprint = {active_sprint_id} AND (summary ~ "B4" OR labels = Beam4k) AND priority = "P2 - Medium" AND status not in (Done, Closed, Dropped) ORDER BY created DESC'
+        params = {'jql': jql, 'maxResults': 5 - len(priorities), 'fields': 'summary,priority'}
+        response = requests.get(url, auth=auth, params=params)
+        if response.status_code == 200:
+            for issue in response.json().get('issues', []):
+                fields = issue['fields']
+                priorities.append({
+                    'title': fields.get('summary', '')[:50],
+                    'ticket': issue['key'],
+                    'priority': fields.get('priority', {}).get('name', ''),
+                    'url': f"https://getnexar.atlassian.net/browse/{issue['key']}"
+                })
+
+    return priorities[:5]
+
+
+def fetch_velocity_data(auth):
+    """Fetch weekly velocity data for last 8 weeks."""
+    from datetime import timedelta
+
+    velocity = []
+    today = datetime.now()
+    url = 'https://getnexar.atlassian.net/rest/api/3/search/jql'
+
+    # Get initial counts (before our 8-week window)
+    first_week_start = today - timedelta(weeks=7, days=today.weekday())
+
+    # Initial open tickets
+    jql = f'project = FS AND labels = Beam4k AND status not in (Done, Closed) AND created < "{first_week_start.strftime("%Y-%m-%d")}"'
+    params = {'jql': jql, 'maxResults': 200, 'fields': 'key'}
+    response = requests.get(url, auth=auth, params=params)
+    initial_open = len(response.json().get('issues', [])) if response.status_code == 200 else 0
+
+    # Initial open bugs (exclude Done, Closed, Dropped, New, Backlog)
+    jql = f'project = FS AND labels = Beam4k AND issuetype = Bug AND status not in (Done, Closed, Dropped, New, Backlog) AND created < "{first_week_start.strftime("%Y-%m-%d")}"'
+    params = {'jql': jql, 'maxResults': 200, 'fields': 'key'}
+    response = requests.get(url, auth=auth, params=params)
+    initial_bugs = len(response.json().get('issues', [])) if response.status_code == 200 else 0
+
+    for weeks_ago in range(7, -1, -1):  # 8 weeks, oldest to newest
+        week_start = today - timedelta(weeks=weeks_ago, days=today.weekday())
+        week_end = week_start + timedelta(days=6)
+        week_label = week_start.strftime('%m/%d')
+
+        # Resolved tickets this week (only Task, Story, Bug)
+        jql = f'project = FS AND labels = Beam4k AND issuetype in (Task, Story, Bug) AND resolutiondate >= "{week_start.strftime("%Y-%m-%d")}" AND resolutiondate <= "{week_end.strftime("%Y-%m-%d")}"'
+        params = {'jql': jql, 'maxResults': 200, 'fields': 'key'}
+        response = requests.get(url, auth=auth, params=params)
+        resolved = len(response.json().get('issues', [])) if response.status_code == 200 else 0
+
+        # Created tickets this week (only Task, Story, Bug - exclude New, Backlog)
+        jql = f'project = FS AND labels = Beam4k AND issuetype in (Task, Story, Bug) AND status not in (New, Backlog) AND created >= "{week_start.strftime("%Y-%m-%d")}" AND created <= "{week_end.strftime("%Y-%m-%d")}"'
+        params = {'jql': jql, 'maxResults': 200, 'fields': 'key'}
+        response = requests.get(url, auth=auth, params=params)
+        created = len(response.json().get('issues', [])) if response.status_code == 200 else 0
+
+        # Resolved bugs this week (Done, Closed, or Dropped)
+        jql = f'project = FS AND labels = Beam4k AND issuetype = Bug AND resolutiondate >= "{week_start.strftime("%Y-%m-%d")}" AND resolutiondate <= "{week_end.strftime("%Y-%m-%d")}"'
+        params = {'jql': jql, 'maxResults': 200, 'fields': 'key'}
+        response = requests.get(url, auth=auth, params=params)
+        bugs_resolved = len(response.json().get('issues', [])) if response.status_code == 200 else 0
+
+        # Created bugs this week (exclude New/Backlog - only count active bugs)
+        jql = f'project = FS AND labels = Beam4k AND issuetype = Bug AND status not in (New, Backlog) AND created >= "{week_start.strftime("%Y-%m-%d")}" AND created <= "{week_end.strftime("%Y-%m-%d")}"'
+        params = {'jql': jql, 'maxResults': 200, 'fields': 'key'}
+        response = requests.get(url, auth=auth, params=params)
+        bugs_created = len(response.json().get('issues', [])) if response.status_code == 200 else 0
+
+        velocity.append({
+            'week': week_label,
+            'resolved': resolved,
+            'created': created,
+            'bugs_resolved': bugs_resolved,
+            'bugs_created': bugs_created
+        })
+
+    return {'data': velocity, 'initial_open': initial_open, 'initial_bugs': initial_bugs}
 
 
 def main():
@@ -214,8 +350,18 @@ def main():
 
     # Fetch releases
     print("Fetching B4 releases...")
-    releases = fetch_releases(auth)
-    print(f"  Found {len(releases)} releases")
+    fw_releases, mcu_releases = fetch_releases(auth)
+    print(f"  Found {len(fw_releases)} FW releases, {len(mcu_releases)} MCU releases")
+
+    # Fetch velocity data
+    print("Fetching velocity data (8 weeks)...")
+    velocity_result = fetch_velocity_data(auth)
+    print(f"  Done")
+
+    # Fetch top priorities from active sprint
+    print("Fetching top priorities...")
+    priorities = fetch_top_priorities(auth)
+    print(f"  Found {len(priorities)} priorities")
 
     # Calculate metrics
     status_counts = get_status_counts(tickets)
@@ -230,26 +376,22 @@ def main():
             'blocker': 'PVT sign-off waiting on Chicony samples'
         },
         'milestones': [
-            {'name': 'DVT signoff', 'status': 'done', 'date': '2025-09-08'},
-            {'name': 'PVT 0.5', 'status': 'done', 'date': '2025-09-29'},
-            {'name': 'PVT 1.0', 'status': 'done', 'date': '2025-10-20'},
-            {'name': 'Initial FT', 'status': 'done', 'date': '2025-11-17'},
-            {'name': 'Field Test 2', 'status': 'done', 'date': '2025-12-03'},
-            {'name': 'Field Test 3', 'status': 'in_progress', 'date': '2025-12-11'},
-            {'name': 'PVT sign-off', 'status': 'blocked', 'date': 'TBD'},
-            {'name': 'MVP', 'status': 'in_progress', 'date': '2026-01-02'},
             {'name': 'Full Product', 'status': 'backlog', 'date': 'TBD'},
-            {'name': '', 'status': 'empty', 'date': ''},
-            {'name': '', 'status': 'empty', 'date': ''}
+            {'name': 'MVP', 'status': 'in_progress', 'date': '2026-01-02'},
+            {'name': 'PVT sign-off', 'status': 'blocked', 'date': 'TBD'},
+            {'name': 'Field Test 3', 'status': 'in_progress', 'date': '2025-12-11'},
+            {'name': 'Field Test 2', 'status': 'done', 'date': '2025-12-03'},
+            {'name': 'Initial FT', 'status': 'done', 'date': '2025-11-17'},
+            {'name': 'PVT 1.0', 'status': 'done', 'date': '2025-10-20'},
+            {'name': 'PVT 0.5', 'status': 'done', 'date': '2025-09-29'},
+            {'name': 'DVT signoff', 'status': 'done', 'date': '2025-09-08'},
         ],
-        'priorities': [
-            {'title': 'FT Readiness: OBD issue', 'ticket': 'TBD'},
-            {'title': 'MVP: Remote stream bugs', 'ticket': 'FS-3375'},
-            {'title': 'MVP: Encryption', 'ticket': 'FS-3283'},
-            {'title': 'MVP: HTTP Server "Teepee"', 'ticket': 'FS-2677'},
-            {'title': 'Integrate new Logstore', 'ticket': 'FS-3322'}
-        ],
-        'releases': releases,
+        'priorities': priorities,
+        'fw_releases': fw_releases,
+        'mcu_releases': mcu_releases,
+        'velocity': velocity_result['data'],
+        'initial_open': velocity_result['initial_open'],
+        'initial_bugs': velocity_result['initial_bugs'],
         'bugs': bugs,
         'tickets': tickets,
         'metrics': {
