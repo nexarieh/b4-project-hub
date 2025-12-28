@@ -216,11 +216,11 @@ def fetch_top_priorities(auth):
     sprint_start = sprints[0].get('startDate', '')[:10] if sprints[0].get('startDate') else None
     sprint_end = sprints[0].get('endDate', '')[:10] if sprints[0].get('endDate') else None
 
-    # Fetch sprint issues for velocity chart (B4 issues only)
+    # Fetch ALL sprint issues for velocity chart (no B4 filter)
     sprint_issues = []
     url_search = 'https://getnexar.atlassian.net/rest/api/3/search/jql'
-    jql = f'sprint = {active_sprint_id} AND (summary ~ "B4" OR labels = Beam4k) AND issuetype in (Task, Story, Bug)'
-    params = {'jql': jql, 'maxResults': 100, 'fields': 'summary,status,issuetype,resolutiondate,created'}
+    jql = f'sprint = {active_sprint_id} AND issuetype in (Task, Story, Bug)'
+    params = {'jql': jql, 'maxResults': 200, 'fields': 'summary,status,issuetype,resolutiondate,created'}
     response = requests.get(url_search, auth=auth, params=params)
     if response.status_code == 200:
         for issue in response.json().get('issues', []):

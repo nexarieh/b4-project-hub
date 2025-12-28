@@ -359,7 +359,7 @@
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #30363d;">
                     <h2 style="margin: 0; border: none; padding: 0;">📈 Velocity Chart <span id="velocity-title">(Last 8 Weeks)</span></h2>
                     <div style="display: flex; gap: 8px;">
-                        <button id="sprint-velocity-btn" onclick="toggleSprintView()" style="background:#1f6feb;color:#fff;border:none;padding:6px 12px;border-radius:4px;cursor:pointer;font-size:12px;">🎯 Sprint View</button>
+                        <button id="sprint-velocity-btn" onclick="toggleSprintView()" style="background:#1f6feb;color:#fff;border:none;padding:6px 12px;border-radius:4px;cursor:pointer;font-size:12px;">📅 Sprint View</button>
                         <button onclick="openChartFullscreen()" style="background:#30363d;color:#c9d1d9;border:none;padding:6px 12px;border-radius:4px;cursor:pointer;font-size:12px;">⛶ Expand</button>
                     </div>
                 </div>
@@ -891,40 +891,108 @@
 
             const sprintData = data.sprint_data;
             const issues = sprintData.issues || [];
-
-            // Count by status
-            const done = issues.filter(i => ['Done', 'Closed'].includes(i.status)).length;
-            const inProgress = issues.filter(i => i.status === 'In Progress').length;
-            const todo = issues.filter(i => !['Done', 'Closed', 'In Progress', 'Dropped'].includes(i.status)).length;
+            const sprintStart = sprintData.start ? new Date(sprintData.start) : new Date(Date.now() - 14*24*60*60*1000);
+            const sprintEnd = sprintData.end ? new Date(sprintData.end) : new Date();
             const total = issues.length;
 
+            // Generate daily labels for 2 weeks
+            const labels = [];
+            const cumulativeResolved = [];
+            const cumulativeCreated = [];
+            const idealBurndown = [];
+
+            let currentDate = new Date(sprintStart);
+            const dayMs = 24 * 60 * 60 * 1000;
+            let dayIndex = 0;
+
+            while (currentDate <= sprintEnd || dayIndex < 14) {
+                const dateStr = currentDate.toISOString().split('T')[0];
+                const label = `${currentDate.getMonth()+1}/${currentDate.getDate()}`;
+                labels.push(label);
+
+                // Count issues resolved by this date
+                const resolvedByDate = issues.filter(i =>
+                    i.resolved && i.resolved <= dateStr && ['Done', 'Closed'].includes(i.status)
+                ).length;
+                cumulativeResolved.push(resolvedByDate);
+
+                // Count issues created by this date (that are in sprint)
+                const createdByDate = issues.filter(i =>
+                    i.created && i.created <= dateStr
+                ).length;
+                cumulativeCreated.push(createdByDate);
+
+                // Ideal burndown line (linear from total to 0)
+                const daysTotal = Math.ceil((sprintEnd - sprintStart) / dayMs);
+                const idealRemaining = total - (total * dayIndex / daysTotal);
+                idealBurndown.push(Math.max(0, Math.round(idealRemaining)));
+
+                currentDate = new Date(currentDate.getTime() + dayMs);
+                dayIndex++;
+                if (dayIndex > 14) break; // Max 2 weeks
+            }
+
+            // Current remaining (total - resolved)
+            const done = issues.filter(i => ['Done', 'Closed'].includes(i.status)).length;
+            const remaining = total - done;
+
+            // Use overall velocity from 8-week data (per day, not per week)
+            const totalResolved8wk = data.velocity ? data.velocity.reduce((sum, v) => sum + v.resolved, 0) : 0;
+            const avgVelocityPerDay = totalResolved8wk / 56; // 8 weeks = 56 days
+
             window.velocityChart = new Chart(ctx, {
-                type: 'doughnut',
+                type: 'line',
                 data: {
-                    labels: ['Done', 'In Progress', 'To Do'],
-                    datasets: [{
-                        data: [done, inProgress, todo],
-                        backgroundColor: ['#238636', '#1f6feb', '#484f58'],
-                        borderColor: '#161b22',
-                        borderWidth: 2
-                    }]
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: `Velocity Trend (${(avgVelocityPerDay * 7).toFixed(1)}/wk)`,
+                            data: labels.map((_, i) => avgVelocityPerDay * (i + 1)),
+                            borderColor: 'rgba(255, 255, 255, 0.4)',
+                            borderDash: [5, 5],
+                            backgroundColor: 'transparent',
+                            fill: false,
+                            tension: 0,
+                            borderWidth: 2,
+                            pointRadius: 0,
+                            datalabels: { display: false }
+                        },
+                        {
+                            label: `Resolved (${done}/${total})`,
+                            data: cumulativeResolved,
+                            borderColor: '#238636',
+                            backgroundColor: 'rgba(35, 134, 54, 0.1)',
+                            fill: true,
+                            tension: 0.3,
+                            borderWidth: 3
+                        },
+                        {
+                            label: `Total in Sprint (${total})`,
+                            data: cumulativeCreated,
+                            borderColor: '#1f6feb',
+                            backgroundColor: 'rgba(31, 111, 235, 0.1)',
+                            fill: true,
+                            tension: 0.3,
+                            borderWidth: 3
+                        }
+                    ]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: { position: 'right', labels: { color: '#c9d1d9' } },
-                        datalabels: {
-                            color: '#fff',
-                            font: { size: 14, weight: 'bold' },
-                            formatter: (val) => val > 0 ? val : ''
-                        },
+                        legend: { reverse: true, labels: { color: '#c9d1d9' } },
+                        datalabels: { display: false },
                         title: {
                             display: true,
-                            text: `Sprint: ${done}/${total} completed (${Math.round(done/total*100)}%)`,
+                            text: `Sprint: ${done}/${total} completed (${Math.round(done/total*100)}%) - ${remaining} remaining`,
                             color: '#c9d1d9',
-                            font: { size: 16 }
+                            font: { size: 14 }
                         }
+                    },
+                    scales: {
+                        x: { ticks: { color: '#8b949e' }, grid: { color: '#21262d' } },
+                        y: { ticks: { color: '#8b949e' }, grid: { color: '#21262d' }, beginAtZero: true }
                     }
                 },
                 plugins: [ChartDataLabels]

@@ -1,5 +1,5 @@
 {
-  "updated": "2025-12-28T17:22:47.140339",
+  "updated": "2025-12-28T17:33:44.306449",
   "project": {
     "name": "Beam4K (B4)",
     "phase": "Field Test 3 / MVP Development",
@@ -209,7 +209,7 @@
       "bugs_created": 6
     }
   ],
-  "initial_open": 35,
+  "initial_open": 34,
   "initial_bugs": 2,
   "sprint_data": {
     "name": "MX Sprint Y WW51",
@@ -265,6 +265,14 @@
         "created": "2025-12-22"
       },
       {
+        "key": "FS-3441",
+        "summary": "[QA][PICO] Bugs verification FW D9 - ACL & aoni",
+        "status": "Done",
+        "type": "Task",
+        "resolved": "2025-12-23",
+        "created": "2025-12-22"
+      },
+      {
         "key": "FS-3438",
         "summary": "[B4] LTE module update",
         "status": "In Progress",
@@ -295,6 +303,14 @@
         "type": "Bug",
         "resolved": null,
         "created": "2025-12-18"
+      },
+      {
+        "key": "FS-3429",
+        "summary": "Teepee - HLS local stream - Include details in config",
+        "status": "On Hold",
+        "type": "Bug",
+        "resolved": null,
+        "created": "2025-12-15"
       },
       {
         "key": "FS-3420",
@@ -329,12 +345,36 @@
         "created": "2025-12-14"
       },
       {
+        "key": "FS-3407",
+        "summary": "[QA][PICO] run QA cycle on FW D8",
+        "status": "Done",
+        "type": "Task",
+        "resolved": "2025-12-17",
+        "created": "2025-12-14"
+      },
+      {
         "key": "FS-3395",
         "summary": "[B4] Camera crops secondary resolutions",
         "status": "In Review",
         "type": "Bug",
         "resolved": null,
         "created": "2025-12-10"
+      },
+      {
+        "key": "FS-3390",
+        "summary": "Create Initial Open API Structure",
+        "status": "Selected for Execution",
+        "type": "Task",
+        "resolved": null,
+        "created": "2025-12-09"
+      },
+      {
+        "key": "FS-3389",
+        "summary": "Establish AGI Environment",
+        "status": "Selected for Execution",
+        "type": "Task",
+        "resolved": null,
+        "created": "2025-12-09"
       },
       {
         "key": "FS-3376",
@@ -377,6 +417,22 @@
         "created": "2025-11-20"
       },
       {
+        "key": "FS-3324",
+        "summary": "Deprecate Legacy Bash Implementation",
+        "status": "Done",
+        "type": "Task",
+        "resolved": "2025-12-28",
+        "created": "2025-11-12"
+      },
+      {
+        "key": "FS-3323",
+        "summary": "Add Unit & Integration Tests",
+        "status": "Done",
+        "type": "Task",
+        "resolved": "2025-12-18",
+        "created": "2025-11-12"
+      },
+      {
         "key": "FS-3322",
         "summary": "[B4] Integrate LogStore Service into SDK (systemd)",
         "status": "Done",
@@ -417,6 +473,14 @@
         "created": "2025-11-05"
       },
       {
+        "key": "FS-3241",
+        "summary": "Create automation scripts in postman for Public endpoints fo",
+        "status": "In Progress",
+        "type": "Task",
+        "resolved": null,
+        "created": "2025-10-23"
+      },
+      {
         "key": "FS-3231",
         "summary": "[QA] Run validation test for B4 FT (Field testing)",
         "status": "On Hold",
@@ -433,10 +497,58 @@
         "created": "2025-10-10"
       },
       {
+        "key": "FS-3101",
+        "summary": "Explore options to document APIs",
+        "status": "Selected for Execution",
+        "type": "Task",
+        "resolved": null,
+        "created": "2025-08-27"
+      },
+      {
         "key": "FS-3051",
         "summary": "[B4] HWK ACC event not suported",
         "status": "Selected for Execution",
         "type": "Bug",
+        "resolved": null,
+        "created": "2025-07-30"
+      },
+      {
+        "key": "FS-3000",
+        "summary": "New HTTP Server - /api/doupdate",
+        "status": "Done",
+        "type": "Story",
+        "resolved": "2025-12-16",
+        "created": "2025-07-30"
+      },
+      {
+        "key": "FS-2999",
+        "summary": "New HTTP Server - /api/otaupload",
+        "status": "Done",
+        "type": "Story",
+        "resolved": "2025-12-16",
+        "created": "2025-07-30"
+      },
+      {
+        "key": "FS-2996",
+        "summary": "New HTTP Server - attribute",
+        "status": "In Progress",
+        "type": "Story",
+        "resolved": null,
+        "created": "2025-07-30"
+      },
+      {
+        "key": "FS-2994",
+        "summary": "New HTTP Server - /api/debugdata",
+        "status": "Done",
+        "type": "Story",
+        "resolved": "2025-12-24",
+        "created": "2025-07-30"
+      },
+      {
+        "key": "FS-2988",
+        "summary": "New HTTP Server - File Download Handler",
+        "status": "In Progress",
+        "type": "Story",
         "resolved": null,
         "created": "2025-07-30"
       },
@@ -624,6 +736,15 @@
     }
   ],
   "tickets": [
+    {
+      "key": "FS-2637",
+      "summary": "[B4] Session management adjustment/validation",
+      "status": "Backlog",
+      "priority": "P2 - Medium",
+      "assignee": "Unassigned",
+      "version": "-",
+      "url": "https://getnexar.atlassian.net/browse/FS-2637"
+    },
     {
       "key": "FS-3207",
       "summary": "[B4] (sometimes) resetting the MCU using an SoC command",
@@ -974,15 +1095,6 @@
       "assignee": "Unassigned",
       "version": "-",
       "url": "https://getnexar.atlassian.net/browse/FS-2894"
-    },
-    {
-      "key": "FS-3418",
-      "summary": "[B4] Thumbnails still missing on Drives & Clips",
-      "status": "Backlog",
-      "priority": "P2 - Medium",
-      "assignee": "Unassigned",
-      "version": "-",
-      "url": "https://getnexar.atlassian.net/browse/FS-3418"
     }
   ],
   "metrics": {
