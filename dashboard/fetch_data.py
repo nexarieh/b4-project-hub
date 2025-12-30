@@ -50,21 +50,29 @@ def fetch_latest_sprint_page(auth):
     sprint_pages = []
     for page in pages:
         title = page.get('title', '')
-        # Match pattern like "15/12/2025 - Sprint Y WW51 Planning"
-        match = re.search(r'WW(\d+)', title)
-        if match:
-            ww_num = int(match.group(1))
+        # Match pattern like "29/12/2025 - Sprint A WW01 Planning"
+        # Extract date (DD/MM/YYYY) - the planning meeting date
+        date_match = re.search(r'(\d{1,2})/(\d{2})/(\d{4})', title)
+        ww_match = re.search(r'WW(\d+)', title)
+
+        if date_match and ww_match:
+            day = int(date_match.group(1))
+            month = int(date_match.group(2))
+            year = int(date_match.group(3))
+
+            # Sort by actual date (year, month, day) - the planning meeting date
+            # This correctly handles "29/12/2025 - Sprint A WW01" > "15/12/2025 - Sprint Y WW51"
             sprint_pages.append({
                 'id': page['id'],
                 'title': title,
-                'ww': ww_num
+                'sort_key': (year, month, day)
             })
 
     if not sprint_pages:
         return None, None
 
-    # Sort by WW number descending and get the latest
-    sprint_pages.sort(key=lambda x: x['ww'], reverse=True)
+    # Sort by date descending and get the latest
+    sprint_pages.sort(key=lambda x: x['sort_key'], reverse=True)
     latest = sprint_pages[0]
 
     return latest['id'], latest['title']
@@ -220,18 +228,20 @@ def fetch_top_priorities(auth):
     sprint_issues = []
     url_search = 'https://getnexar.atlassian.net/rest/api/3/search/jql'
     jql = f'sprint = {active_sprint_id} AND issuetype in (Task, Story, Bug)'
-    params = {'jql': jql, 'maxResults': 200, 'fields': 'summary,status,issuetype,resolutiondate,created'}
+    params = {'jql': jql, 'maxResults': 200, 'fields': 'summary,status,issuetype,resolutiondate,created,labels'}
     response = requests.get(url_search, auth=auth, params=params)
     if response.status_code == 200:
         for issue in response.json().get('issues', []):
             fields = issue['fields']
+            labels = fields.get('labels', [])
             sprint_issues.append({
                 'key': issue['key'],
                 'summary': fields.get('summary', '')[:60],
                 'status': fields.get('status', {}).get('name', ''),
                 'type': fields.get('issuetype', {}).get('name', ''),
                 'resolved': fields.get('resolutiondate', '')[:10] if fields.get('resolutiondate') else None,
-                'created': fields.get('created', '')[:10] if fields.get('created') else None
+                'created': fields.get('created', '')[:10] if fields.get('created') else None,
+                'is_b4': 'Beam4k' in labels
             })
 
     # Fetch P1 issues first, then P2 if needed (B4 issues only, exclude Dropped)
@@ -277,7 +287,7 @@ def fetch_top_priorities(auth):
     }
 
 
-def fetch_velocity_data(auth):
+def fetch_velocity_data(auth, b4_only=True):
     """Fetch weekly velocity data for last 8 weeks."""
     from datetime import timedelta
 
@@ -288,14 +298,17 @@ def fetch_velocity_data(auth):
     # Get initial counts (before our 8-week window)
     first_week_start = today - timedelta(weeks=7, days=today.weekday())
 
+    # Label filter for B4 issues
+    label_filter = 'AND labels = Beam4k' if b4_only else ''
+
     # Initial open tickets (Task, Story, Bug only - exclude New, Backlog)
-    jql = f'project = FS AND labels = Beam4k AND issuetype in (Task, Story, Bug) AND status not in (Done, Closed, New, Backlog) AND created < "{first_week_start.strftime("%Y-%m-%d")}"'
+    jql = f'project = FS {label_filter} AND issuetype in (Task, Story, Bug) AND status not in (Done, Closed, New, Backlog) AND created < "{first_week_start.strftime("%Y-%m-%d")}"'
     params = {'jql': jql, 'maxResults': 200, 'fields': 'key'}
     response = requests.get(url, auth=auth, params=params)
     initial_open = len(response.json().get('issues', [])) if response.status_code == 200 else 0
 
     # Initial open bugs (exclude Done, Closed, Dropped, New, Backlog)
-    jql = f'project = FS AND labels = Beam4k AND issuetype = Bug AND status not in (Done, Closed, Dropped, New, Backlog) AND created < "{first_week_start.strftime("%Y-%m-%d")}"'
+    jql = f'project = FS {label_filter} AND issuetype = Bug AND status not in (Done, Closed, Dropped, New, Backlog) AND created < "{first_week_start.strftime("%Y-%m-%d")}"'
     params = {'jql': jql, 'maxResults': 200, 'fields': 'key'}
     response = requests.get(url, auth=auth, params=params)
     initial_bugs = len(response.json().get('issues', [])) if response.status_code == 200 else 0
@@ -306,25 +319,25 @@ def fetch_velocity_data(auth):
         week_label = week_start.strftime('%m/%d')
 
         # Resolved tickets this week (only Task, Story, Bug)
-        jql = f'project = FS AND labels = Beam4k AND issuetype in (Task, Story, Bug) AND resolutiondate >= "{week_start.strftime("%Y-%m-%d")}" AND resolutiondate <= "{week_end.strftime("%Y-%m-%d")}"'
+        jql = f'project = FS {label_filter} AND issuetype in (Task, Story, Bug) AND resolutiondate >= "{week_start.strftime("%Y-%m-%d")}" AND resolutiondate <= "{week_end.strftime("%Y-%m-%d")}"'
         params = {'jql': jql, 'maxResults': 200, 'fields': 'key'}
         response = requests.get(url, auth=auth, params=params)
         resolved = len(response.json().get('issues', [])) if response.status_code == 200 else 0
 
         # Created tickets this week (only Task, Story, Bug - exclude New, Backlog)
-        jql = f'project = FS AND labels = Beam4k AND issuetype in (Task, Story, Bug) AND status not in (New, Backlog) AND created >= "{week_start.strftime("%Y-%m-%d")}" AND created <= "{week_end.strftime("%Y-%m-%d")}"'
+        jql = f'project = FS {label_filter} AND issuetype in (Task, Story, Bug) AND status not in (New, Backlog) AND created >= "{week_start.strftime("%Y-%m-%d")}" AND created <= "{week_end.strftime("%Y-%m-%d")}"'
         params = {'jql': jql, 'maxResults': 200, 'fields': 'key'}
         response = requests.get(url, auth=auth, params=params)
         created = len(response.json().get('issues', [])) if response.status_code == 200 else 0
 
         # Resolved bugs this week (Done, Closed, or Dropped)
-        jql = f'project = FS AND labels = Beam4k AND issuetype = Bug AND resolutiondate >= "{week_start.strftime("%Y-%m-%d")}" AND resolutiondate <= "{week_end.strftime("%Y-%m-%d")}"'
+        jql = f'project = FS {label_filter} AND issuetype = Bug AND resolutiondate >= "{week_start.strftime("%Y-%m-%d")}" AND resolutiondate <= "{week_end.strftime("%Y-%m-%d")}"'
         params = {'jql': jql, 'maxResults': 200, 'fields': 'key'}
         response = requests.get(url, auth=auth, params=params)
         bugs_resolved = len(response.json().get('issues', [])) if response.status_code == 200 else 0
 
         # Created bugs this week (exclude New/Backlog - only count active bugs)
-        jql = f'project = FS AND labels = Beam4k AND issuetype = Bug AND status not in (New, Backlog) AND created >= "{week_start.strftime("%Y-%m-%d")}" AND created <= "{week_end.strftime("%Y-%m-%d")}"'
+        jql = f'project = FS {label_filter} AND issuetype = Bug AND status not in (New, Backlog) AND created >= "{week_start.strftime("%Y-%m-%d")}" AND created <= "{week_end.strftime("%Y-%m-%d")}"'
         params = {'jql': jql, 'maxResults': 200, 'fields': 'key'}
         response = requests.get(url, auth=auth, params=params)
         bugs_created = len(response.json().get('issues', [])) if response.status_code == 200 else 0
@@ -381,9 +394,14 @@ def main():
     fw_releases, mcu_releases = fetch_releases(auth)
     print(f"  Found {len(fw_releases)} FW releases, {len(mcu_releases)} MCU releases")
 
-    # Fetch velocity data
-    print("Fetching velocity data (8 weeks)...")
-    velocity_result = fetch_velocity_data(auth)
+    # Fetch velocity data (B4 only)
+    print("Fetching velocity data (8 weeks, B4 only)...")
+    velocity_result = fetch_velocity_data(auth, b4_only=True)
+    print(f"  Done")
+
+    # Fetch velocity data (all issues)
+    print("Fetching velocity data (8 weeks, all issues)...")
+    velocity_all_result = fetch_velocity_data(auth, b4_only=False)
     print(f"  Done")
 
     # Fetch top priorities from active sprint
@@ -434,6 +452,9 @@ def main():
         'velocity': velocity_result['data'],
         'initial_open': velocity_result['initial_open'],
         'initial_bugs': velocity_result['initial_bugs'],
+        'velocity_all': velocity_all_result['data'],
+        'initial_open_all': velocity_all_result['initial_open'],
+        'initial_bugs_all': velocity_all_result['initial_bugs'],
         'sprint_data': {
             'name': active_sprint_name,
             'start': sprint_start,
