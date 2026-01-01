@@ -164,6 +164,7 @@ def fetch_b4_bugs(auth):
             'priority': fields.get('priority', {}).get('name', 'Unknown') if fields.get('priority') else 'Unknown',
             'assignee': fields.get('assignee', {}).get('displayName', 'Unassigned') if fields.get('assignee') else 'Unassigned',
             'version': version_found,
+            'created': fields.get('created', '')[:10],  # YYYY-MM-DD
             'url': f"https://getnexar.atlassian.net/browse/{issue['key']}"
         })
 
@@ -244,34 +245,23 @@ def fetch_top_priorities(auth):
                 'is_b4': 'Beam4k' in labels
             })
 
-    # Fetch P1 issues first, then P2 if needed (B4 issues only, exclude Dropped)
+    # Fetch priorities by P1, P2, then P3 (B4 issues only, exclude Done/Closed/Dropped)
     url = 'https://getnexar.atlassian.net/rest/api/3/search/jql'
     priorities = []
 
-    # Get P1 issues first
-    jql = f'sprint = {active_sprint_id} AND (summary ~ "B4" OR labels = Beam4k) AND priority = "P1 - High" AND status not in (Done, Closed, Dropped) ORDER BY created DESC'
-    params = {'jql': jql, 'maxResults': 5, 'fields': 'summary,priority'}
-    response = requests.get(url, auth=auth, params=params)
-    if response.status_code == 200:
-        for issue in response.json().get('issues', []):
-            fields = issue['fields']
-            priorities.append({
-                'title': fields.get('summary', '')[:50],
-                'ticket': issue['key'],
-                'priority': fields.get('priority', {}).get('name', ''),
-                'url': f"https://getnexar.atlassian.net/browse/{issue['key']}"
-            })
-
-    # If we don't have 5 yet, get P2 issues
-    if len(priorities) < 5:
-        jql = f'sprint = {active_sprint_id} AND (summary ~ "B4" OR labels = Beam4k) AND priority = "P2 - Medium" AND status not in (Done, Closed, Dropped) ORDER BY created DESC'
+    # Get issues by priority order: P1 first, then P2, then P3
+    # Order by status (In Progress first) then by creation date
+    for priority_level in ['P1 - High', 'P2 - Medium', 'P3 - Low']:
+        if len(priorities) >= 5:
+            break
+        jql = f'sprint = {active_sprint_id} AND (summary ~ "B4" OR labels = Beam4k) AND priority = "{priority_level}" AND status not in (Done, Closed, Dropped) ORDER BY status ASC, created DESC'
         params = {'jql': jql, 'maxResults': 5 - len(priorities), 'fields': 'summary,priority'}
         response = requests.get(url, auth=auth, params=params)
         if response.status_code == 200:
             for issue in response.json().get('issues', []):
                 fields = issue['fields']
                 priorities.append({
-                    'title': fields.get('summary', '')[:50],
+                    'title': fields.get('summary', '')[:80],
                     'ticket': issue['key'],
                     'priority': fields.get('priority', {}).get('name', ''),
                     'url': f"https://getnexar.atlassian.net/browse/{issue['key']}"
@@ -288,12 +278,24 @@ def fetch_top_priorities(auth):
 
 
 def fetch_velocity_data(auth, b4_only=True):
-    """Fetch weekly velocity data for last 8 weeks."""
+    """Fetch weekly velocity data for last 8 weeks using story points."""
     from datetime import timedelta
 
     velocity = []
     today = datetime.now()
     url = 'https://getnexar.atlassian.net/rest/api/3/search/jql'
+
+    # Story points field
+    story_points_field = 'customfield_10421'
+    default_points = 2  # Default story points if not set
+
+    def sum_story_points(issues):
+        """Sum story points for a list of issues, using default if not set."""
+        total = 0
+        for issue in issues:
+            points = issue['fields'].get(story_points_field)
+            total += points if points else default_points
+        return total
 
     # Get initial counts (before our 8-week window)
     first_week_start = today - timedelta(weeks=7, days=today.weekday())
@@ -303,15 +305,15 @@ def fetch_velocity_data(auth, b4_only=True):
 
     # Initial open tickets (Task, Story, Bug only - exclude New, Backlog)
     jql = f'project = FS {label_filter} AND issuetype in (Task, Story, Bug) AND status not in (Done, Closed, New, Backlog) AND created < "{first_week_start.strftime("%Y-%m-%d")}"'
-    params = {'jql': jql, 'maxResults': 200, 'fields': 'key'}
+    params = {'jql': jql, 'maxResults': 200, 'fields': f'key,{story_points_field}'}
     response = requests.get(url, auth=auth, params=params)
-    initial_open = len(response.json().get('issues', [])) if response.status_code == 200 else 0
+    initial_open = sum_story_points(response.json().get('issues', [])) if response.status_code == 200 else 0
 
     # Initial open bugs (exclude Done, Closed, Dropped, New, Backlog)
     jql = f'project = FS {label_filter} AND issuetype = Bug AND status not in (Done, Closed, Dropped, New, Backlog) AND created < "{first_week_start.strftime("%Y-%m-%d")}"'
-    params = {'jql': jql, 'maxResults': 200, 'fields': 'key'}
+    params = {'jql': jql, 'maxResults': 200, 'fields': f'key,{story_points_field}'}
     response = requests.get(url, auth=auth, params=params)
-    initial_bugs = len(response.json().get('issues', [])) if response.status_code == 200 else 0
+    initial_bugs = sum_story_points(response.json().get('issues', [])) if response.status_code == 200 else 0
 
     for weeks_ago in range(7, -1, -1):  # 8 weeks, oldest to newest
         week_start = today - timedelta(weeks=weeks_ago, days=today.weekday())
@@ -320,27 +322,27 @@ def fetch_velocity_data(auth, b4_only=True):
 
         # Resolved tickets this week (only Task, Story, Bug)
         jql = f'project = FS {label_filter} AND issuetype in (Task, Story, Bug) AND resolutiondate >= "{week_start.strftime("%Y-%m-%d")}" AND resolutiondate <= "{week_end.strftime("%Y-%m-%d")}"'
-        params = {'jql': jql, 'maxResults': 200, 'fields': 'key'}
+        params = {'jql': jql, 'maxResults': 200, 'fields': f'key,{story_points_field}'}
         response = requests.get(url, auth=auth, params=params)
-        resolved = len(response.json().get('issues', [])) if response.status_code == 200 else 0
+        resolved = sum_story_points(response.json().get('issues', [])) if response.status_code == 200 else 0
 
         # Created tickets this week (only Task, Story, Bug - exclude New, Backlog)
         jql = f'project = FS {label_filter} AND issuetype in (Task, Story, Bug) AND status not in (New, Backlog) AND created >= "{week_start.strftime("%Y-%m-%d")}" AND created <= "{week_end.strftime("%Y-%m-%d")}"'
-        params = {'jql': jql, 'maxResults': 200, 'fields': 'key'}
+        params = {'jql': jql, 'maxResults': 200, 'fields': f'key,{story_points_field}'}
         response = requests.get(url, auth=auth, params=params)
-        created = len(response.json().get('issues', [])) if response.status_code == 200 else 0
+        created = sum_story_points(response.json().get('issues', [])) if response.status_code == 200 else 0
 
         # Resolved bugs this week (Done, Closed, or Dropped)
         jql = f'project = FS {label_filter} AND issuetype = Bug AND resolutiondate >= "{week_start.strftime("%Y-%m-%d")}" AND resolutiondate <= "{week_end.strftime("%Y-%m-%d")}"'
-        params = {'jql': jql, 'maxResults': 200, 'fields': 'key'}
+        params = {'jql': jql, 'maxResults': 200, 'fields': f'key,{story_points_field}'}
         response = requests.get(url, auth=auth, params=params)
-        bugs_resolved = len(response.json().get('issues', [])) if response.status_code == 200 else 0
+        bugs_resolved = sum_story_points(response.json().get('issues', [])) if response.status_code == 200 else 0
 
         # Created bugs this week (exclude New/Backlog - only count active bugs)
         jql = f'project = FS {label_filter} AND issuetype = Bug AND status not in (New, Backlog) AND created >= "{week_start.strftime("%Y-%m-%d")}" AND created <= "{week_end.strftime("%Y-%m-%d")}"'
-        params = {'jql': jql, 'maxResults': 200, 'fields': 'key'}
+        params = {'jql': jql, 'maxResults': 200, 'fields': f'key,{story_points_field}'}
         response = requests.get(url, auth=auth, params=params)
-        bugs_created = len(response.json().get('issues', [])) if response.status_code == 200 else 0
+        bugs_created = sum_story_points(response.json().get('issues', [])) if response.status_code == 200 else 0
 
         velocity.append({
             'week': week_label,
@@ -351,6 +353,77 @@ def fetch_velocity_data(auth, b4_only=True):
         })
 
     return {'data': velocity, 'initial_open': initial_open, 'initial_bugs': initial_bugs}
+
+
+def fetch_team_velocity(auth):
+    """Fetch resolved story points per person for last 8 weeks."""
+    from datetime import timedelta
+
+    today = datetime.now()
+    url = 'https://getnexar.atlassian.net/rest/api/3/search/jql'
+
+    # Story points field
+    story_points_field = 'customfield_10421'
+    default_points = 2  # Default story points if not set
+
+    team_velocity = {}
+    weeks_data = []
+
+    for weeks_ago in range(7, -1, -1):
+        week_start = today - timedelta(weeks=weeks_ago, days=today.weekday())
+        week_end = week_start + timedelta(days=6)
+        week_label = week_start.strftime('%m/%d')
+        weeks_data.append(week_label)
+
+        # Fetch resolved issues this week with assignee and story points
+        jql = f'project = FS AND labels = Beam4k AND issuetype in (Task, Story, Bug) AND resolutiondate >= "{week_start.strftime("%Y-%m-%d")}" AND resolutiondate <= "{week_end.strftime("%Y-%m-%d")}"'
+        params = {'jql': jql, 'maxResults': 200, 'fields': f'assignee,{story_points_field}'}
+        response = requests.get(url, auth=auth, params=params)
+
+        if response.status_code == 200:
+            for issue in response.json().get('issues', []):
+                assignee = issue['fields'].get('assignee')
+                name = assignee.get('displayName', 'Unassigned') if assignee else 'Unassigned'
+                points = issue['fields'].get(story_points_field)
+                points = points if points else default_points
+
+                if name not in team_velocity:
+                    team_velocity[name] = {'weeks': {}, 'total': 0}
+
+                team_velocity[name]['weeks'][week_label] = team_velocity[name]['weeks'].get(week_label, 0) + points
+                team_velocity[name]['total'] += points
+
+    return {'data': team_velocity, 'weeks': weeks_data}
+
+
+def fetch_workload(auth):
+    """Fetch current workload per person (all open B4 issues)."""
+    url = 'https://getnexar.atlassian.net/rest/api/3/search/jql'
+
+    # Include all open issues (not Done/Closed/Dropped)
+    jql = 'project = FS AND labels = Beam4k AND status not in (Done, Closed, Dropped) AND assignee is not EMPTY'
+    params = {'jql': jql, 'maxResults': 200, 'fields': 'assignee,status,priority'}
+    response = requests.get(url, auth=auth, params=params)
+
+    workload = {}
+    if response.status_code == 200:
+        for issue in response.json().get('issues', []):
+            assignee = issue['fields'].get('assignee', {}).get('displayName', 'Unknown')
+            status = issue['fields'].get('status', {}).get('name', '')
+            priority = issue['fields'].get('priority', {}).get('name', '') if issue['fields'].get('priority') else ''
+
+            if assignee not in workload:
+                workload[assignee] = {'in_progress': 0, 'todo': 0, 'high_priority': 0}
+
+            if status == 'In Progress':
+                workload[assignee]['in_progress'] += 1
+            else:
+                workload[assignee]['todo'] += 1
+
+            if priority in ['P1 - High', 'Highest']:
+                workload[assignee]['high_priority'] += 1
+
+    return workload
 
 
 def main():
@@ -403,6 +476,16 @@ def main():
     print("Fetching velocity data (8 weeks, all issues)...")
     velocity_all_result = fetch_velocity_data(auth, b4_only=False)
     print(f"  Done")
+
+    # Fetch team velocity data
+    print("Fetching team velocity...")
+    team_velocity = fetch_team_velocity(auth)
+    print(f"  Found data for {len(team_velocity['data'])} team members")
+
+    # Fetch workload data
+    print("Fetching workload...")
+    workload = fetch_workload(auth)
+    print(f"  Found workload for {len(workload)} team members")
 
     # Fetch top priorities from active sprint
     print("Fetching top priorities...")
@@ -461,6 +544,8 @@ def main():
             'end': sprint_end,
             'issues': sprint_issues
         },
+        'team_velocity': team_velocity,
+        'workload': workload,
         'bugs': bugs,
         'tickets': tickets,
         'metrics': {

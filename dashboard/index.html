@@ -205,6 +205,19 @@
             cursor: pointer;
             font-size: 12px;
         }
+        .filter-presets { display: flex; gap: 6px; flex-wrap: wrap; }
+        .preset-btn {
+            background: #21262d;
+            border: 1px solid #30363d;
+            color: #8b949e;
+            padding: 4px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            transition: all 0.15s;
+        }
+        .preset-btn:hover { background: #30363d; color: #c9d1d9; border-color: #58a6ff; }
+        .preset-btn.active { background: #1f6feb; color: #fff; border-color: #1f6feb; }
         .clickable { cursor: pointer; }
         .clickable:hover { text-decoration: underline; }
         .sortable { cursor: pointer; user-select: none; }
@@ -263,7 +276,14 @@
                 <h1>🚗 B4 Project Dashboard</h1>
                 <p class="subtitle" id="project-phase">Loading...</p>
             </div>
-            <div style="display: flex; gap: 10px;">
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <div style="position:relative;">
+                    <input type="text" id="global-search" placeholder="Search bugs & tickets..." oninput="globalSearch(this.value)" onkeydown="handleSearchKey(event)" style="width:220px;padding:10px 12px;background:#21262d;border:1px solid #30363d;border-radius:6px;color:#c9d1d9;font-size:14px;">
+                    <div id="search-results" style="display:none;position:absolute;top:100%;left:0;right:0;background:#161b22;border:1px solid #30363d;border-radius:0 0 6px 6px;max-height:300px;overflow-y:auto;z-index:100;"></div>
+                </div>
+                <button onclick="exportToCSV()" style="background:#6e7681;color:#fff;border:none;padding:10px 20px;border-radius:6px;cursor:pointer;font-size:14px;font-weight:500;">📥 Export</button>
+                <button onclick="showSummaryView()" style="background:#6e7681;color:#fff;border:none;padding:10px 20px;border-radius:6px;cursor:pointer;font-size:14px;font-weight:500;">📊 Summary</button>
+                <button onclick="copyShareableLink()" style="background:#6e7681;color:#fff;border:none;padding:10px 20px;border-radius:6px;cursor:pointer;font-size:14px;font-weight:500;">🔗 Share</button>
                 <a id="sprint-btn" href="#" target="_blank" style="background:#1f6feb;color:#fff;border:none;padding:10px 20px;border-radius:6px;cursor:pointer;font-size:14px;font-weight:500;text-decoration:none;display:inline-block;">🗓️ Current Sprint</a>
                 <button id="refresh-btn" onclick="refreshData()">🔄 Refresh Data</button>
             </div>
@@ -357,9 +377,10 @@
             <!-- Velocity Chart (full width) -->
             <div class="card" style="margin-top: 20px; grid-column: 1 / -1;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #30363d;">
-                    <h2 style="margin: 0; border: none; padding: 0;">📈 Velocity Chart <span id="velocity-title">(Last 8 Weeks)</span></h2>
+                    <h2 style="margin: 0; border: none; padding: 0;">📈 Velocity (Story Points) <span id="velocity-title">(Last 8 Weeks)</span></h2>
                     <div style="display: flex; gap: 8px;">
                         <button id="sprint-velocity-btn" onclick="toggleSprintView()" style="background:#1f6feb;color:#fff;border:none;padding:6px 12px;border-radius:4px;cursor:pointer;font-size:12px;">📅 Sprint View</button>
+                        <button id="b4-filter-btn" onclick="toggleB4Filter()" style="background:#238636;color:#fff;border:none;padding:6px 12px;border-radius:4px;cursor:pointer;font-size:12px;">🏷️ B4 Only</button>
                         <button onclick="openChartFullscreen()" style="background:#30363d;color:#c9d1d9;border:none;padding:6px 12px;border-radius:4px;cursor:pointer;font-size:12px;">⛶ Expand</button>
                     </div>
                 </div>
@@ -377,7 +398,7 @@
                                     <th>Summary</th>
                                     <th>Type</th>
                                     <th>Status</th>
-                                    <th>Resolved</th>
+                                    <th>SP Resolved</th>
                                 </tr>
                             </thead>
                             <tbody id="sprint-issues-body"></tbody>
@@ -389,9 +410,66 @@
             <!-- Fullscreen Chart Overlay -->
             <div id="chart-fullscreen" class="chart-fullscreen" style="display: none;">
                 <button class="close-btn" onclick="closeChartFullscreen()">✕ Close</button>
-                <h2>📈 Velocity Chart (Last 8 Weeks)</h2>
-                <div style="height: calc(100vh - 100px);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <h2 id="fullscreen-title" style="margin: 0;">📈 Velocity (Story Points) (Last 8 Weeks)</h2>
+                    <div style="display: flex; gap: 10px; margin-right: 120px;">
+                        <button id="fullscreen-sprint-btn" onclick="toggleFullscreenView()" style="background:#1f6feb;color:#fff;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:14px;">📅 Sprint View</button>
+                        <button id="fullscreen-b4-btn" onclick="toggleFullscreenB4Filter()" style="background:#238636;color:#fff;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:14px;">🏷️ B4 Only</button>
+                    </div>
+                </div>
+                <div style="height: calc(100vh - 120px);">
                     <canvas id="velocity-chart-full"></canvas>
+                </div>
+            </div>
+
+            <!-- Bug Aging Analysis -->
+            <div class="card" style="margin-top: 20px; grid-column: 1 / -1;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #30363d;">
+                    <h2 style="margin: 0; border: none; padding: 0;">🔍 Bug Aging Analysis</h2>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px;">
+                    <div>
+                        <div class="chart-container" style="height: 180px;">
+                            <canvas id="bug-aging-chart"></canvas>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="metric-box" style="margin-bottom: 12px;">
+                            <div class="metric-value" id="avg-bug-age">-</div>
+                            <div class="metric-label">Avg Bug Age (days)</div>
+                        </div>
+                        <div class="metric-box">
+                            <div class="metric-value" id="bug-forecast">-</div>
+                            <div class="metric-label">Bug Backlog Trend</div>
+                        </div>
+                    </div>
+                    <div>
+                        <div style="color: #8b949e; font-size: 12px; margin-bottom: 8px; text-transform: uppercase;">Oldest Bugs</div>
+                        <div id="oldest-bugs-list" style="font-size: 13px;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Team Metrics -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px; grid-column: 1 / -1;">
+                <!-- Team Velocity -->
+                <div class="card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #30363d;">
+                        <h2 style="margin: 0; border: none; padding: 0;">👥 Team Velocity - Story Points (8 weeks)</h2>
+                    </div>
+                    <div class="chart-container" style="height: 320px;">
+                        <canvas id="team-velocity-chart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Workload Balance -->
+                <div class="card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #30363d;">
+                        <h2 style="margin: 0; border: none; padding: 0;">⚖️ Current Workload</h2>
+                    </div>
+                    <div class="chart-container" style="height: 320px;">
+                        <canvas id="workload-chart"></canvas>
+                    </div>
                 </div>
             </div>
 
@@ -400,6 +478,13 @@
                 <!-- BR Bugs (full width) -->
                 <div class="card">
                     <h2><a id="bugs-link" href="#" target="_blank" style="color: inherit; text-decoration: none;">🐛 BR Bugs (<span id="bugs-count">0</span>) ↗</a></h2>
+                    <div class="filter-presets" style="margin-bottom: 8px;">
+                        <button onclick="applyBugsPreset('critical')" class="preset-btn">Critical (>30d)</button>
+                        <button onclick="applyBugsPreset('unassigned')" class="preset-btn">Unassigned</button>
+                        <button onclick="applyBugsPreset('in_progress')" class="preset-btn">In Progress</button>
+                        <button onclick="applyBugsPreset('high_priority')" class="preset-btn">High Priority</button>
+                        <button onclick="clearBugsFilter()" class="preset-btn" style="background:#30363d;">All</button>
+                    </div>
                     <div id="bugs-filter" class="filter-bar" style="display:none;"></div>
                     <table id="bugs-table" style="width: 100%;">
                         <thead>
@@ -410,6 +495,7 @@
                                 <th class="sortable" onclick="sortBugs('assignee')">Assignee <span id="bugs-sort-assignee"></span></th>
                                 <th class="sortable" onclick="sortBugs('priority')">Priority <span id="bugs-sort-priority"></span></th>
                                 <th class="sortable" onclick="sortBugs('version')">Version <span id="bugs-sort-version"></span></th>
+                                <th class="sortable" onclick="sortBugs('age')">Age <span id="bugs-sort-age"></span></th>
                             </tr>
                         </thead>
                         <tbody id="bugs-body">Loading...</tbody>
@@ -420,6 +506,13 @@
                 <!-- FS Tickets (full width) -->
                 <div class="card">
                     <h2><a id="tickets-link" href="#" target="_blank" style="color: inherit; text-decoration: none;">📋 FS Tickets (<span id="tickets-count">0</span>) ↗</a></h2>
+                    <div class="filter-presets" style="margin-bottom: 8px;">
+                        <button onclick="applyTicketsPreset('unassigned')" class="preset-btn">Unassigned</button>
+                        <button onclick="applyTicketsPreset('in_progress')" class="preset-btn">In Progress</button>
+                        <button onclick="applyTicketsPreset('high_priority')" class="preset-btn">High Priority</button>
+                        <button onclick="applyTicketsPreset('todo')" class="preset-btn">To Do</button>
+                        <button onclick="clearTicketsFilter()" class="preset-btn" style="background:#30363d;">All</button>
+                    </div>
                     <div id="tickets-filter" class="filter-bar" style="display:none;"></div>
                     <table id="tickets-table" style="width: 100%;">
                         <thead>
@@ -442,14 +535,36 @@
         <p class="updated" id="updated"></p>
     </div>
 
+    <!-- Summary View Overlay -->
+    <div id="summary-overlay" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:#ffffff;color:#000000;padding:40px;z-index:2000;overflow-y:auto;">
+        <button onclick="closeSummaryView()" style="position:absolute;top:20px;right:20px;background:#da3633;color:#fff;border:none;padding:10px 20px;border-radius:6px;cursor:pointer;font-size:14px;">✕ Close</button>
+        <div id="summary-content"></div>
+    </div>
+
     <script>
-        async function loadDashboard() {
+        async function loadDashboard(skipRefresh = false) {
             try {
+                // Auto-refresh from JIRA on page load (unless skipRefresh is true)
+                if (!skipRefresh) {
+                    showLoadingIndicator('Fetching from JIRA...');
+                    try {
+                        await fetch('/api/refresh');
+                    } catch (e) {
+                        console.log('Auto-refresh failed, using cached data');
+                    }
+                    hideLoadingIndicator();
+                }
+
                 const response = await fetch('data/dashboard.json?t=' + Date.now());
                 if (!response.ok) throw new Error('Data not found. Run: python3 fetch_data.py');
                 const data = await response.json();
+
+                // Load filter state from URL before rendering
+                loadStateFromUrl();
+
                 renderDashboard(data);
             } catch (error) {
+                hideLoadingIndicator();
                 document.querySelector('.grid').innerHTML = `
                     <div class="card full-width">
                         <div class="error">
@@ -460,6 +575,578 @@
                     </div>
                 `;
             }
+        }
+
+        function showLoadingIndicator(message = 'Loading...') {
+            let indicator = document.getElementById('loading-indicator');
+            if (!indicator) {
+                indicator = document.createElement('div');
+                indicator.id = 'loading-indicator';
+                indicator.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#1f6feb;color:#fff;text-align:center;padding:8px;font-size:14px;z-index:9999;';
+                document.body.prepend(indicator);
+            }
+            indicator.textContent = message;
+            indicator.style.display = 'block';
+        }
+
+        function hideLoadingIndicator() {
+            const indicator = document.getElementById('loading-indicator');
+            if (indicator) indicator.style.display = 'none';
+        }
+
+        function calculateBugAge(createdDate) {
+            if (!createdDate) return 0;
+            const created = new Date(createdDate);
+            const now = new Date();
+            return Math.floor((now - created) / (1000 * 60 * 60 * 24));
+        }
+
+        function getAgeStyle(age) {
+            if (age > 30) return 'color: #da3633; font-weight: bold;';
+            if (age > 14) return 'color: #d29922;';
+            return 'color: #8b949e;';
+        }
+
+        function renderBugAgingChart(bugs, velocityData) {
+            const ageBuckets = { '<7d': 0, '7-14d': 0, '14-30d': 0, '>30d': 0 };
+            const bugAges = [];
+
+            bugs.forEach(bug => {
+                const age = calculateBugAge(bug.created);
+                bugAges.push({ ...bug, age });
+                if (age < 7) ageBuckets['<7d']++;
+                else if (age < 14) ageBuckets['7-14d']++;
+                else if (age < 30) ageBuckets['14-30d']++;
+                else ageBuckets['>30d']++;
+            });
+
+            window.bugAges = bugAges;
+
+            // Calculate and display average age
+            const avgAge = bugAges.length > 0
+                ? Math.round(bugAges.reduce((sum, b) => sum + b.age, 0) / bugAges.length)
+                : 0;
+            document.getElementById('avg-bug-age').textContent = avgAge;
+
+            // Bug closure forecast
+            if (velocityData && velocityData.length > 0) {
+                const avgBugClosure = velocityData.reduce((sum, v) => sum + (v.bugs_resolved || 0), 0) / velocityData.length;
+                const avgBugCreation = velocityData.reduce((sum, v) => sum + (v.bugs_created || 0), 0) / velocityData.length;
+                const netClosure = avgBugClosure - avgBugCreation;
+
+                if (netClosure <= 0) {
+                    const growthRate = Math.abs(netClosure).toFixed(1);
+                    document.getElementById('bug-forecast').innerHTML = `<span style="color:#da3633">+${growthRate}/wk</span>`;
+                } else {
+                    const weeksToZero = Math.ceil(bugs.length / netClosure);
+                    document.getElementById('bug-forecast').innerHTML = `<span style="color:#238636">~${weeksToZero} wks</span>`;
+                }
+            }
+
+            // Show oldest bugs list
+            const oldest = [...bugAges].sort((a, b) => b.age - a.age).slice(0, 4);
+            document.getElementById('oldest-bugs-list').innerHTML = oldest.map(b => `
+                <div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #21262d;">
+                    <a href="${b.url}" target="_blank" class="ticket-link">${b.key}</a>
+                    <span style="${getAgeStyle(b.age)}">${b.age}d</span>
+                </div>
+            `).join('');
+
+            // Create horizontal bar chart
+            const ctx = document.getElementById('bug-aging-chart').getContext('2d');
+            if (window.bugAgingChart) window.bugAgingChart.destroy();
+
+            window.bugAgingChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(ageBuckets),
+                    datasets: [{
+                        data: Object.values(ageBuckets),
+                        backgroundColor: ['#238636', '#1f6feb', '#d29922', '#da3633'],
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        datalabels: {
+                            display: true,
+                            color: '#c9d1d9',
+                            anchor: 'end',
+                            align: 'right',
+                            font: { weight: 'bold' }
+                        }
+                    },
+                    scales: {
+                        x: { ticks: { color: '#8b949e' }, grid: { color: '#21262d' } },
+                        y: { ticks: { color: '#c9d1d9' }, grid: { display: false } }
+                    },
+                    onClick: (e, elements) => {
+                        if (elements.length > 0) {
+                            const bucketName = Object.keys(ageBuckets)[elements[0].index];
+                            filterBugsByAge(bucketName);
+                        }
+                    }
+                },
+                plugins: [ChartDataLabels]
+            });
+        }
+
+        function renderTeamVelocityChart(teamVelocity) {
+            if (!teamVelocity || !teamVelocity.data || Object.keys(teamVelocity.data).length === 0) {
+                document.getElementById('team-velocity-chart').parentElement.innerHTML = '<div style="color: #8b949e; text-align: center; padding: 40px;">No team velocity data</div>';
+                return;
+            }
+
+            const ctx = document.getElementById('team-velocity-chart').getContext('2d');
+            if (window.teamVelocityChart) window.teamVelocityChart.destroy();
+
+            const weeks = teamVelocity.weeks;
+            const members = Object.keys(teamVelocity.data).sort((a, b) =>
+                teamVelocity.data[b].total - teamVelocity.data[a].total
+            );
+
+            // Colors for team members
+            const colors = ['#238636', '#1f6feb', '#d29922', '#da3633', '#8957e5', '#3fb950', '#58a6ff', '#f85149'];
+
+            const datasets = members.map((member, idx) => ({
+                label: member.split(' ')[0], // First name only
+                data: weeks.map(w => teamVelocity.data[member].weeks[w] || 0),
+                backgroundColor: colors[idx % colors.length],
+                borderRadius: 2
+            }));
+
+            window.teamVelocityChart = new Chart(ctx, {
+                type: 'bar',
+                data: { labels: weeks, datasets },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { stacked: true, ticks: { color: '#8b949e' }, grid: { display: false } },
+                        y: { stacked: true, ticks: { color: '#8b949e' }, grid: { color: '#21262d' } }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { color: '#8b949e', boxWidth: 12, padding: 8, font: { size: 10 } }
+                        },
+                        datalabels: { display: false }
+                    }
+                },
+                plugins: [ChartDataLabels]
+            });
+        }
+
+        function renderWorkloadChart(workload) {
+            if (!workload || Object.keys(workload).length === 0) {
+                document.getElementById('workload-chart').parentElement.innerHTML = '<div style="color: #8b949e; text-align: center; padding: 40px;">No workload data</div>';
+                return;
+            }
+
+            const ctx = document.getElementById('workload-chart').getContext('2d');
+            if (window.workloadChart) window.workloadChart.destroy();
+
+            // Sort by total work descending (show all members)
+            const members = Object.keys(workload).sort((a, b) => {
+                const totalA = workload[a].in_progress + workload[a].todo;
+                const totalB = workload[b].in_progress + workload[b].todo;
+                return totalB - totalA;
+            });
+
+            const labels = members.map(m => m.split(' ')[0]); // First name
+
+            window.workloadChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels,
+                    datasets: [
+                        {
+                            label: 'In Progress',
+                            data: members.map(m => workload[m].in_progress),
+                            backgroundColor: '#238636',
+                            borderRadius: 2
+                        },
+                        {
+                            label: 'To Do',
+                            data: members.map(m => workload[m].todo),
+                            backgroundColor: '#1f6feb',
+                            borderRadius: 2
+                        },
+                        {
+                            label: 'High Priority',
+                            data: members.map(m => workload[m].high_priority),
+                            backgroundColor: '#da3633',
+                            borderRadius: 2
+                        }
+                    ]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { stacked: true, ticks: { color: '#8b949e' }, grid: { color: '#21262d' } },
+                        y: { stacked: true, ticks: { color: '#c9d1d9' }, grid: { display: false } }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { color: '#8b949e', boxWidth: 12, padding: 8, font: { size: 10 } }
+                        },
+                        datalabels: { display: false }
+                    }
+                },
+                plugins: [ChartDataLabels]
+            });
+        }
+
+        function exportToCSV() {
+            const bugs = window.bugsData || [];
+            const tickets = window.ticketsData || [];
+            const dateStr = new Date().toISOString().split('T')[0];
+
+            let csv = 'Type,Key,Summary,Status,Priority,Assignee,Version,Age (days)\n';
+
+            bugs.forEach(b => {
+                const age = calculateBugAge(b.created);
+                const summary = (b.summary || '').replace(/"/g, '""').replace(/,/g, ' ');
+                csv += `Bug,"${b.key}","${summary}","${b.status}","${b.priority || '-'}","${b.assignee}","${b.version || '-'}",${age}\n`;
+            });
+
+            tickets.forEach(t => {
+                const summary = (t.summary || '').replace(/"/g, '""').replace(/,/g, ' ');
+                csv += `Ticket,"${t.key}","${summary}","${t.status}","${t.priority || '-'}","${t.assignee}","${t.version || '-'}",-\n`;
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `b4-dashboard-${dateStr}.csv`;
+            link.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function showSummaryView() {
+            const data = window.lastVelocityData;
+            if (!data) return;
+
+            const bugs = window.bugsData || [];
+            const tickets = window.ticketsData || [];
+            const avgAge = document.getElementById('avg-bug-age')?.textContent || '-';
+
+            // Calculate velocity
+            const velocity = data.velocity && data.velocity.length > 0
+                ? (data.velocity.reduce((sum, v) => sum + v.resolved, 0) / data.velocity.length).toFixed(1)
+                : '-';
+
+            // Get critical bugs (>30 days)
+            const criticalBugs = (window.bugAges || [])
+                .filter(b => b.age > 30)
+                .sort((a, b) => b.age - a.age)
+                .slice(0, 5);
+
+            // Get next milestone
+            const nextMilestone = data.milestones?.find(m => m.status === 'in_progress');
+
+            document.getElementById('summary-content').innerHTML = `
+                <h1 style="color:#000;border-bottom:3px solid #1f6feb;padding-bottom:15px;margin-bottom:30px;">B4 Project Status Summary</h1>
+                <p style="color:#666;margin-bottom:30px;">Generated: ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}</p>
+
+                <h2 style="color:#1f6feb;margin-bottom:15px;">Current Phase</h2>
+                <p style="font-size:20px;font-weight:bold;margin-bottom:10px;">${data.project?.phase || 'N/A'}</p>
+                <p style="margin-bottom:30px;">Next Milestone: <strong>${nextMilestone?.name || 'TBD'}</strong> (${nextMilestone?.date || 'TBD'})</p>
+
+                <h2 style="color:#1f6feb;margin-bottom:15px;">Key Metrics</h2>
+                <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:20px;margin-bottom:30px;">
+                    <div style="background:#f0f0f0;padding:20px;border-radius:8px;text-align:center;">
+                        <div style="font-size:32px;font-weight:bold;color:#1f6feb;">${bugs.length}</div>
+                        <div style="color:#666;">Open Bugs</div>
+                    </div>
+                    <div style="background:#f0f0f0;padding:20px;border-radius:8px;text-align:center;">
+                        <div style="font-size:32px;font-weight:bold;color:#1f6feb;">${tickets.length}</div>
+                        <div style="color:#666;">Open Tickets</div>
+                    </div>
+                    <div style="background:#f0f0f0;padding:20px;border-radius:8px;text-align:center;">
+                        <div style="font-size:32px;font-weight:bold;color:#1f6feb;">${velocity}/wk</div>
+                        <div style="color:#666;">Avg SP/wk</div>
+                    </div>
+                    <div style="background:#f0f0f0;padding:20px;border-radius:8px;text-align:center;">
+                        <div style="font-size:32px;font-weight:bold;color:#1f6feb;">${avgAge}d</div>
+                        <div style="color:#666;">Avg Bug Age</div>
+                    </div>
+                </div>
+
+                <h2 style="color:#1f6feb;margin-bottom:15px;">Top 5 Priorities</h2>
+                <ol style="margin-bottom:30px;padding-left:20px;">
+                    ${(data.priorities || []).map(p => `<li style="margin-bottom:8px;"><strong>[${p.ticket}]</strong> ${p.title}</li>`).join('')}
+                </ol>
+
+                ${criticalBugs.length > 0 ? `
+                    <h2 style="color:#da3633;margin-bottom:15px;">Critical Bugs (&gt;30 days)</h2>
+                    <ul style="margin-bottom:30px;padding-left:20px;">
+                        ${criticalBugs.map(b => `<li style="margin-bottom:8px;"><strong>${b.key}</strong> (${b.age}d): ${b.summary}</li>`).join('')}
+                    </ul>
+                ` : ''}
+
+                <div style="margin-top:40px;border-top:1px solid #ddd;padding-top:20px;">
+                    <button onclick="window.print()" style="background:#1f6feb;color:#fff;border:none;padding:15px 30px;border-radius:8px;cursor:pointer;font-size:16px;margin-right:10px;">🖨️ Print Report</button>
+                    <button onclick="closeSummaryView()" style="background:#6e7681;color:#fff;border:none;padding:15px 30px;border-radius:8px;cursor:pointer;font-size:16px;">Close</button>
+                </div>
+            `;
+
+            document.getElementById('summary-overlay').style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeSummaryView() {
+            document.getElementById('summary-overlay').style.display = 'none';
+            document.body.style.overflow = '';
+        }
+
+        function showKeyboardHelp() {
+            alert(`Keyboard Shortcuts:
+
+Esc - Close overlays
+R - Refresh data
+S - Toggle sprint/8-week view
+E - Export CSV
+P - Print summary view
+? - Show this help`);
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            // Don't trigger when typing in inputs (except for search-related keys)
+            const isInput = document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA';
+
+            // Always allow Escape
+            if (e.key === 'Escape') {
+                closeChartFullscreen();
+                closeSummaryView();
+                document.getElementById('search-results').style.display = 'none';
+                document.getElementById('global-search').blur();
+                return;
+            }
+
+            if (isInput) return;
+
+            switch(e.key) {
+                case 'r':
+                    if (!e.ctrlKey && !e.metaKey) refreshData();
+                    break;
+                case 's':
+                    if (!e.ctrlKey && !e.metaKey) toggleSprintView();
+                    break;
+                case 'e':
+                    if (!e.ctrlKey && !e.metaKey) exportToCSV();
+                    break;
+                case 'p':
+                    if (!e.ctrlKey && !e.metaKey) showSummaryView();
+                    break;
+                case '/':
+                    e.preventDefault();
+                    document.getElementById('global-search').focus();
+                    break;
+                case '?':
+                    showKeyboardHelp();
+                    break;
+            }
+        });
+
+        // Shareable URLs
+        function getUrlState() {
+            const state = {};
+            if (window.bugsFilter) {
+                if (window.bugsFilter.custom) {
+                    state.bf = window.bugsFilter.label;
+                } else {
+                    state.bf = `${window.bugsFilter.field}:${window.bugsFilter.value}`;
+                }
+            }
+            if (window.ticketsFilter) {
+                if (window.ticketsFilter.custom) {
+                    state.tf = window.ticketsFilter.label;
+                } else {
+                    state.tf = `${window.ticketsFilter.field}:${window.ticketsFilter.value}`;
+                }
+            }
+            if (window.sprintViewActive) state.sv = 1;
+            if (!window.b4FilterActive) state.all = 1;
+            return state;
+        }
+
+        function setUrlFromState() {
+            const state = getUrlState();
+            const hash = Object.keys(state).length > 0 ? '#' + new URLSearchParams(state).toString() : '';
+            history.replaceState(null, '', window.location.pathname + hash);
+        }
+
+        function loadStateFromUrl() {
+            if (!window.location.hash) return;
+            try {
+                const params = new URLSearchParams(window.location.hash.slice(1));
+
+                if (params.get('bf')) {
+                    const bf = params.get('bf');
+                    if (bf.includes(':')) {
+                        const [field, value] = bf.split(':');
+                        window.bugsFilter = { field, value };
+                    }
+                }
+                if (params.get('tf')) {
+                    const tf = params.get('tf');
+                    if (tf.includes(':')) {
+                        const [field, value] = tf.split(':');
+                        window.ticketsFilter = { field, value };
+                    }
+                }
+                if (params.get('sv') === '1') {
+                    window.sprintViewActive = true;
+                }
+                if (params.get('all') === '1') {
+                    window.b4FilterActive = false;
+                }
+            } catch (e) {
+                console.log('Failed to load state from URL:', e);
+            }
+        }
+
+        function copyShareableLink() {
+            setUrlFromState();
+            const url = window.location.href;
+            navigator.clipboard.writeText(url).then(() => {
+                const btn = event.target;
+                const original = btn.textContent;
+                btn.textContent = '✓ Copied!';
+                btn.style.background = '#238636';
+                setTimeout(() => {
+                    btn.textContent = original;
+                    btn.style.background = '#6e7681';
+                }, 2000);
+            }).catch(() => {
+                prompt('Copy this URL:', url);
+            });
+        }
+
+        // Global search functionality
+        let searchTimeout;
+        function globalSearch(query) {
+            clearTimeout(searchTimeout);
+            const dropdown = document.getElementById('search-results');
+
+            if (!query || query.length < 2) {
+                dropdown.style.display = 'none';
+                return;
+            }
+
+            searchTimeout = setTimeout(() => {
+                const q = query.toLowerCase();
+                const bugs = window.bugsData || [];
+                const tickets = window.ticketsData || [];
+
+                const matchingBugs = bugs.filter(b =>
+                    b.key.toLowerCase().includes(q) ||
+                    b.summary.toLowerCase().includes(q) ||
+                    b.assignee.toLowerCase().includes(q)
+                ).slice(0, 5);
+
+                const matchingTickets = tickets.filter(t =>
+                    t.key.toLowerCase().includes(q) ||
+                    t.summary.toLowerCase().includes(q) ||
+                    t.assignee.toLowerCase().includes(q)
+                ).slice(0, 5);
+
+                if (matchingBugs.length === 0 && matchingTickets.length === 0) {
+                    dropdown.innerHTML = '<div style="padding:12px;color:#8b949e;">No results found</div>';
+                } else {
+                    dropdown.innerHTML = `
+                        ${matchingBugs.length ? '<div style="padding:8px 12px;color:#8b949e;font-size:11px;text-transform:uppercase;border-bottom:1px solid #30363d;">Bugs</div>' : ''}
+                        ${matchingBugs.map(b => `
+                            <div onclick="window.open('${b.url}', '_blank')" style="padding:10px 12px;cursor:pointer;border-bottom:1px solid #21262d;display:flex;justify-content:space-between;" onmouseover="this.style.background='#21262d'" onmouseout="this.style.background='transparent'">
+                                <span><strong style="color:#58a6ff;">${b.key}</strong> <span style="color:#8b949e;">- ${b.summary.substring(0, 40)}...</span></span>
+                                <span style="color:#8b949e;font-size:12px;">${b.status}</span>
+                            </div>
+                        `).join('')}
+                        ${matchingTickets.length ? '<div style="padding:8px 12px;color:#8b949e;font-size:11px;text-transform:uppercase;border-bottom:1px solid #30363d;">Tickets</div>' : ''}
+                        ${matchingTickets.map(t => `
+                            <div onclick="window.open('${t.url}', '_blank')" style="padding:10px 12px;cursor:pointer;border-bottom:1px solid #21262d;display:flex;justify-content:space-between;" onmouseover="this.style.background='#21262d'" onmouseout="this.style.background='transparent'">
+                                <span><strong style="color:#58a6ff;">${t.key}</strong> <span style="color:#8b949e;">- ${t.summary.substring(0, 40)}...</span></span>
+                                <span style="color:#8b949e;font-size:12px;">${t.status}</span>
+                            </div>
+                        `).join('')}
+                    `;
+                }
+                dropdown.style.display = 'block';
+            }, 200);
+        }
+
+        function handleSearchKey(e) {
+            if (e.key === 'Escape') {
+                document.getElementById('search-results').style.display = 'none';
+                e.target.blur();
+            }
+        }
+
+        // Close search dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('#global-search') && !e.target.closest('#search-results')) {
+                document.getElementById('search-results').style.display = 'none';
+            }
+        });
+
+        function filterBugsByAge(bucket) {
+            const ranges = {
+                '<7d': [0, 7],
+                '7-14d': [7, 14],
+                '14-30d': [14, 30],
+                '>30d': [30, Infinity]
+            };
+            const [min, max] = ranges[bucket];
+
+            // Filter bugs by age range
+            window.bugsAgeFilter = { min, max };
+            window.bugsPage = 1;
+
+            // Custom filter for age-based filtering
+            const filteredBugs = window.bugsData.filter(b => {
+                const age = calculateBugAge(b.created);
+                return age >= min && age < max;
+            });
+
+            // Show filter bar
+            document.getElementById('bugs-filter').style.display = 'flex';
+            document.getElementById('bugs-filter').innerHTML = `<span>Filtered by:</span> <span class="filter-value">age = "${bucket}"</span> <button onclick="clearBugsFilter()">✕ Clear</button>`;
+
+            // Render filtered data
+            const start = 0;
+            const end = window.bugsPerPage;
+            const pageData = filteredBugs.slice(start, end);
+            const totalPages = Math.ceil(filteredBugs.length / window.bugsPerPage) || 1;
+
+            const html = pageData.map(bug => {
+                const age = calculateBugAge(bug.created);
+                const ageStyle = getAgeStyle(age);
+                return `
+                <tr>
+                    <td><a class="ticket-link" href="${bug.url}" target="_blank">${bug.key}</a></td>
+                    <td class="truncate" title="${bug.summary}">${bug.summary}</td>
+                    <td><span class="status-badge status-${bug.status.toLowerCase().replace(' ', '-')}">${bug.status}</span></td>
+                    <td>${bug.assignee}</td>
+                    <td>${bug.priority || '-'}</td>
+                    <td>${bug.version || '-'}</td>
+                    <td style="${ageStyle}">${age}d</td>
+                </tr>`;
+            }).join('');
+            document.getElementById('bugs-body').innerHTML = html || '<tr><td colspan="7">No bugs</td></tr>';
+
+            // Update pagination
+            let paginationHtml = `<span class="page-info">1 / ${totalPages} (${filteredBugs.length})</span>`;
+            document.getElementById('bugs-pagination').innerHTML = paginationHtml;
         }
 
         function renderDashboard(data) {
@@ -599,6 +1286,13 @@
             document.getElementById('bugs-link').href = data.links.br_bugs;
             renderBugsPage();
 
+            // Bug Aging Analysis chart
+            renderBugAgingChart(data.bugs, data.velocity);
+
+            // Team Metrics charts
+            renderTeamVelocityChart(data.team_velocity);
+            renderWorkloadChart(data.workload);
+
             // Tickets table with pagination
             window.ticketsData = data.tickets;
             window.ticketsPage = 1;
@@ -650,7 +1344,7 @@
                                 borderWidth: 2
                             },
                             {
-                                label: `Velocity Trend (${avgVelocity.toFixed(1)}/wk)`,
+                                label: `Velocity Trend (${avgVelocity.toFixed(1)} SP/wk)`,
                                 data: velocityTrendLine,
                                 borderColor: 'rgba(255, 255, 255, 0.4)',
                                 borderDash: [5, 5],
@@ -662,7 +1356,7 @@
                                 datalabels: { display: false }
                             },
                             {
-                                label: 'Resolved (cumulative)',
+                                label: 'SP Resolved (cumulative)',
                                 data: cumulativeResolved,
                                 borderColor: '#238636',
                                 backgroundColor: 'rgba(35, 134, 54, 0.1)',
@@ -670,7 +1364,7 @@
                                 tension: 0.3
                             },
                             {
-                                label: 'Created (cumulative)',
+                                label: 'SP Created (cumulative)',
                                 data: cumulativeCreated,
                                 borderColor: '#1f6feb',
                                 backgroundColor: 'rgba(31, 111, 235, 0.1)',
@@ -704,23 +1398,38 @@
             // Updated timestamp
             const updated = new Date(data.updated);
             document.getElementById('updated').textContent = `Last updated: ${updated.toLocaleString()}`;
+
+            // Re-render current view (sprint or 8-week) after data refresh
+            if (window.sprintViewActive) {
+                renderSprintChart();
+                renderSprintIssues();
+            }
         }
 
         async function refreshData() {
             const btn = document.getElementById('refresh-btn');
             btn.disabled = true;
             btn.classList.add('loading');
-            btn.textContent = '⏳ Fetching...';
+            btn.textContent = '⏳ Fetching from JIRA...';
 
             try {
-                // Call the fetch script via a cache-busting reload
-                await loadDashboard();
-                btn.textContent = '✅ Updated!';
+                // Call the API to fetch fresh data from JIRA
+                const response = await fetch('/api/refresh');
+                const result = await response.json();
+
+                if (result.success) {
+                    // Reload the dashboard with new data
+                    await loadDashboard();
+                    btn.textContent = '✅ Updated!';
+                } else {
+                    btn.textContent = '❌ ' + (result.message || 'Failed');
+                }
+
                 setTimeout(() => {
                     btn.textContent = '🔄 Refresh Data';
                     btn.disabled = false;
                     btn.classList.remove('loading');
-                }, 1500);
+                }, 2000);
             } catch (e) {
                 btn.textContent = '❌ Error';
                 setTimeout(() => {
@@ -735,9 +1444,15 @@
             // Apply filter if set
             let filteredData = window.bugsData;
             if (window.bugsFilter) {
-                filteredData = window.bugsData.filter(b => b[window.bugsFilter.field] === window.bugsFilter.value);
-                document.getElementById('bugs-filter').style.display = 'flex';
-                document.getElementById('bugs-filter').innerHTML = `<span>Filtered by:</span> <span class="filter-value">${window.bugsFilter.field} = "${window.bugsFilter.value}"</span> <button onclick="clearBugsFilter()">✕ Clear</button>`;
+                if (window.bugsFilter.custom && window.bugsFilter.fn) {
+                    filteredData = window.bugsData.filter(window.bugsFilter.fn);
+                    document.getElementById('bugs-filter').style.display = 'flex';
+                    document.getElementById('bugs-filter').innerHTML = `<span>Filtered by:</span> <span class="filter-value">${window.bugsFilter.label}</span> <button onclick="clearBugsFilter()">✕ Clear</button>`;
+                } else {
+                    filteredData = window.bugsData.filter(b => b[window.bugsFilter.field] === window.bugsFilter.value);
+                    document.getElementById('bugs-filter').style.display = 'flex';
+                    document.getElementById('bugs-filter').innerHTML = `<span>Filtered by:</span> <span class="filter-value">${window.bugsFilter.field} = "${window.bugsFilter.value}"</span> <button onclick="clearBugsFilter()">✕ Clear</button>`;
+                }
             } else {
                 document.getElementById('bugs-filter').style.display = 'none';
             }
@@ -747,7 +1462,10 @@
             const pageData = filteredData.slice(start, end);
             const totalPages = Math.ceil(filteredData.length / window.bugsPerPage) || 1;
 
-            const html = pageData.map(bug => `
+            const html = pageData.map(bug => {
+                const age = calculateBugAge(bug.created);
+                const ageStyle = getAgeStyle(age);
+                return `
                 <tr>
                     <td><a class="ticket-link" href="${bug.url}" target="_blank">${bug.key}</a></td>
                     <td class="truncate" title="${bug.summary}">${bug.summary}</td>
@@ -755,9 +1473,10 @@
                     <td class="clickable" onclick="filterBugs('assignee','${bug.assignee}')">${bug.assignee}</td>
                     <td class="clickable" onclick="filterBugs('priority','${bug.priority || '-'}')">${bug.priority || '-'}</td>
                     <td class="clickable" onclick="filterBugs('version','${bug.version || '-'}')">${bug.version || '-'}</td>
-                </tr>
-            `).join('');
-            document.getElementById('bugs-body').innerHTML = html || '<tr><td colspan="6">No bugs</td></tr>';
+                    <td style="${ageStyle}">${age}d</td>
+                </tr>`;
+            }).join('');
+            document.getElementById('bugs-body').innerHTML = html || '<tr><td colspan="7">No bugs</td></tr>';
 
             let paginationHtml = `<button onclick="window.bugsPage=1; renderBugsPage()" ${window.bugsPage === 1 ? 'disabled' : ''}>&laquo;</button>`;
             paginationHtml += `<button onclick="window.bugsPage--; renderBugsPage()" ${window.bugsPage === 1 ? 'disabled' : ''}>&lsaquo; Prev</button>`;
@@ -776,7 +1495,83 @@
         function clearBugsFilter() {
             window.bugsFilter = null;
             window.bugsPage = 1;
+            updatePresetButtons('bugs', null);
             renderBugsPage();
+        }
+
+        function applyBugsPreset(preset) {
+            const bugs = window.bugsData || [];
+            let filterFn, filterLabel;
+
+            switch (preset) {
+                case 'critical':
+                    filterFn = b => calculateBugAge(b.created) > 30;
+                    filterLabel = 'age > 30 days';
+                    break;
+                case 'unassigned':
+                    filterFn = b => b.assignee === 'Unassigned';
+                    filterLabel = 'assignee = Unassigned';
+                    break;
+                case 'in_progress':
+                    filterFn = b => b.status === 'In Progress';
+                    filterLabel = 'status = In Progress';
+                    break;
+                case 'high_priority':
+                    filterFn = b => b.priority && (b.priority.includes('High') || b.priority.includes('P1'));
+                    filterLabel = 'priority = High';
+                    break;
+                default:
+                    clearBugsFilter();
+                    return;
+            }
+
+            window.bugsFilter = { custom: true, fn: filterFn, label: filterLabel };
+            window.bugsPage = 1;
+            updatePresetButtons('bugs', preset);
+            renderBugsPage();
+        }
+
+        function applyTicketsPreset(preset) {
+            const tickets = window.ticketsData || [];
+            let filterFn, filterLabel;
+
+            switch (preset) {
+                case 'unassigned':
+                    filterFn = t => t.assignee === 'Unassigned';
+                    filterLabel = 'assignee = Unassigned';
+                    break;
+                case 'in_progress':
+                    filterFn = t => t.status === 'In Progress';
+                    filterLabel = 'status = In Progress';
+                    break;
+                case 'high_priority':
+                    filterFn = t => t.priority && (t.priority.includes('High') || t.priority.includes('P1'));
+                    filterLabel = 'priority = High';
+                    break;
+                case 'todo':
+                    filterFn = t => t.status === 'To Do' || t.status === 'Selected for Execution';
+                    filterLabel = 'status = To Do';
+                    break;
+                default:
+                    clearTicketsFilter();
+                    return;
+            }
+
+            window.ticketsFilter = { custom: true, fn: filterFn, label: filterLabel };
+            window.ticketsPage = 1;
+            updatePresetButtons('tickets', preset);
+            renderTicketsPage();
+        }
+
+        function updatePresetButtons(type, activePreset) {
+            const container = document.querySelector(`#${type === 'bugs' ? 'bugs-body' : 'tickets-body'}`)?.closest('.card')?.querySelector('.filter-presets');
+            if (!container) return;
+            container.querySelectorAll('.preset-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (activePreset && btn.textContent.toLowerCase().includes(activePreset.replace('_', ' ').slice(0, 4))) {
+                    btn.classList.add('active');
+                }
+            });
         }
 
         function sortBugs(field) {
@@ -790,6 +1585,13 @@
 
             // Sort data
             window.bugsData.sort((a, b) => {
+                // Special handling for age (numeric sort based on created date)
+                if (field === 'age') {
+                    const ageA = calculateBugAge(a.created);
+                    const ageB = calculateBugAge(b.created);
+                    return window.bugsSortDir === 'asc' ? ageA - ageB : ageB - ageA;
+                }
+                // String sort for other fields
                 let valA = (a[field] || '').toString().toLowerCase();
                 let valB = (b[field] || '').toString().toLowerCase();
                 if (valA < valB) return window.bugsSortDir === 'asc' ? -1 : 1;
@@ -798,7 +1600,7 @@
             });
 
             // Update sort indicators
-            ['key','summary','status','assignee','priority','version'].forEach(f => {
+            ['key','summary','status','assignee','priority','version','age'].forEach(f => {
                 document.getElementById('bugs-sort-' + f).textContent = '';
             });
             document.getElementById('bugs-sort-' + field).textContent = window.bugsSortDir === 'asc' ? '▲' : '▼';
@@ -811,9 +1613,15 @@
             // Apply filter if set
             let filteredData = window.ticketsData;
             if (window.ticketsFilter) {
-                filteredData = window.ticketsData.filter(t => t[window.ticketsFilter.field] === window.ticketsFilter.value);
-                document.getElementById('tickets-filter').style.display = 'flex';
-                document.getElementById('tickets-filter').innerHTML = `<span>Filtered by:</span> <span class="filter-value">${window.ticketsFilter.field} = "${window.ticketsFilter.value}"</span> <button onclick="clearTicketsFilter()">✕ Clear</button>`;
+                if (window.ticketsFilter.custom && window.ticketsFilter.fn) {
+                    filteredData = window.ticketsData.filter(window.ticketsFilter.fn);
+                    document.getElementById('tickets-filter').style.display = 'flex';
+                    document.getElementById('tickets-filter').innerHTML = `<span>Filtered by:</span> <span class="filter-value">${window.ticketsFilter.label}</span> <button onclick="clearTicketsFilter()">✕ Clear</button>`;
+                } else {
+                    filteredData = window.ticketsData.filter(t => t[window.ticketsFilter.field] === window.ticketsFilter.value);
+                    document.getElementById('tickets-filter').style.display = 'flex';
+                    document.getElementById('tickets-filter').innerHTML = `<span>Filtered by:</span> <span class="filter-value">${window.ticketsFilter.field} = "${window.ticketsFilter.value}"</span> <button onclick="clearTicketsFilter()">✕ Clear</button>`;
+                }
             } else {
                 document.getElementById('tickets-filter').style.display = 'none';
             }
@@ -853,15 +1661,18 @@
         function clearTicketsFilter() {
             window.ticketsFilter = null;
             window.ticketsPage = 1;
+            updatePresetButtons('tickets', null);
             renderTicketsPage();
         }
 
         // Sprint view toggle
         window.sprintViewActive = false;
+        window.b4FilterActive = true; // Default: show B4 only
 
         function toggleSprintView() {
             window.sprintViewActive = !window.sprintViewActive;
             const btn = document.getElementById('sprint-velocity-btn');
+            const b4Btn = document.getElementById('b4-filter-btn');
             const title = document.getElementById('velocity-title');
             const issuesContainer = document.getElementById('sprint-issues-container');
 
@@ -869,17 +1680,113 @@
                 btn.textContent = '📊 8 Week View';
                 btn.style.background = '#238636';
                 const sprintData = window.lastVelocityData?.sprint_data;
-                title.textContent = `(${sprintData?.name || 'Current Sprint'})`;
+                title.innerHTML = `(${sprintData?.name || 'Current Sprint'})${getSprintPredictionBadge()}`;
                 issuesContainer.style.display = 'block';
                 renderSprintChart();
                 renderSprintIssues();
             } else {
-                btn.textContent = '🎯 Sprint View';
+                btn.textContent = '📅 Sprint View';
                 btn.style.background = '#1f6feb';
-                title.textContent = '(Last 8 Weeks)';
+                title.innerHTML = '(Last 8 Weeks)';
                 issuesContainer.style.display = 'none';
                 render8WeekChart();
             }
+        }
+
+        function toggleB4Filter() {
+            window.b4FilterActive = !window.b4FilterActive;
+            const btn = document.getElementById('b4-filter-btn');
+            const title = document.getElementById('velocity-title');
+
+            if (window.b4FilterActive) {
+                btn.textContent = '🏷️ B4 Only';
+                btn.style.background = '#238636';
+            } else {
+                btn.textContent = '📋 All Issues';
+                btn.style.background = '#6e7681';
+            }
+
+            if (window.sprintViewActive) {
+                const sprintData = window.lastVelocityData?.sprint_data;
+                title.innerHTML = `(${sprintData?.name || 'Current Sprint'})${getSprintPredictionBadge()}`;
+                renderSprintChart();
+                renderSprintIssues();
+            } else {
+                render8WeekChart();
+            }
+        }
+
+        function getFilteredSprintIssues() {
+            const data = window.lastVelocityData;
+            if (!data || !data.sprint_data) return [];
+
+            const issues = data.sprint_data.issues || [];
+            if (window.b4FilterActive) {
+                // Filter to B4 issues only (has Beam4k label)
+                return issues.filter(i => i.is_b4 === true);
+            }
+            return issues;
+        }
+
+        function predictSprintCompletion() {
+            const data = window.lastVelocityData;
+            if (!data || !data.sprint_data) return null;
+
+            const issues = getFilteredSprintIssues();
+            const total = issues.length;
+            if (total === 0) return null;
+
+            const done = issues.filter(i => ['Done', 'Closed'].includes(i.status)).length;
+            const remaining = total - done;
+
+            const sprintStart = data.sprint_data.start ? new Date(data.sprint_data.start) : null;
+            const sprintEnd = data.sprint_data.end ? new Date(data.sprint_data.end) : null;
+            if (!sprintStart || !sprintEnd) return null;
+
+            const today = new Date();
+            const daysElapsed = Math.max(1, Math.floor((today - sprintStart) / (24 * 60 * 60 * 1000)));
+            const daysRemaining = Math.max(0, Math.floor((sprintEnd - today) / (24 * 60 * 60 * 1000)));
+
+            // Current velocity (issues/day)
+            const currentVelocity = done / daysElapsed;
+
+            // Predict completion
+            if (currentVelocity <= 0) {
+                return { status: 'at_risk', message: 'No progress yet', confidence: 'low' };
+            }
+
+            const daysNeeded = remaining / currentVelocity;
+            const predictedEnd = new Date(today.getTime() + daysNeeded * 24 * 60 * 60 * 1000);
+            const daysVariance = Math.round((sprintEnd - predictedEnd) / (24 * 60 * 60 * 1000));
+
+            const confidence = daysElapsed >= 3 ? 'high' : 'low';
+
+            if (daysVariance >= 2) {
+                return { status: 'ahead', message: `${daysVariance}d ahead`, confidence };
+            } else if (daysVariance >= 0) {
+                return { status: 'on_track', message: 'On track', confidence };
+            } else if (daysVariance >= -2) {
+                return { status: 'at_risk', message: `${Math.abs(daysVariance)}d behind`, confidence };
+            } else {
+                return { status: 'behind', message: `${Math.abs(daysVariance)}d behind`, confidence };
+            }
+        }
+
+        function getSprintPredictionBadge() {
+            const prediction = predictSprintCompletion();
+            if (!prediction) return '';
+
+            const colors = {
+                ahead: '#238636',
+                on_track: '#238636',
+                at_risk: '#d29922',
+                behind: '#da3633'
+            };
+
+            const color = colors[prediction.status] || '#6e7681';
+            const opacity = prediction.confidence === 'low' ? '0.7' : '1';
+
+            return `<span style="background:${color};color:#fff;padding:4px 10px;border-radius:12px;font-size:12px;margin-left:10px;opacity:${opacity}">${prediction.message}</span>`;
         }
 
         function renderSprintChart() {
@@ -890,7 +1797,7 @@
             if (window.velocityChart) window.velocityChart.destroy();
 
             const sprintData = data.sprint_data;
-            const issues = sprintData.issues || [];
+            const issues = getFilteredSprintIssues();
             const sprintStart = sprintData.start ? new Date(sprintData.start) : new Date(Date.now() - 14*24*60*60*1000);
             const sprintEnd = sprintData.end ? new Date(sprintData.end) : new Date();
             const total = issues.length;
@@ -936,8 +1843,9 @@
             const done = issues.filter(i => ['Done', 'Closed'].includes(i.status)).length;
             const remaining = total - done;
 
-            // Use overall velocity from 8-week data (per day, not per week)
-            const totalResolved8wk = data.velocity ? data.velocity.reduce((sum, v) => sum + v.resolved, 0) : 0;
+            // Use 8-week velocity based on current B4 filter setting
+            const velocitySource = window.b4FilterActive ? data.velocity : (data.velocity_all || data.velocity);
+            const totalResolved8wk = velocitySource ? velocitySource.reduce((sum, v) => sum + v.resolved, 0) : 0;
             const avgVelocityPerDay = totalResolved8wk / 56; // 8 weeks = 56 days
 
             window.velocityChart = new Chart(ctx, {
@@ -946,7 +1854,7 @@
                     labels: labels,
                     datasets: [
                         {
-                            label: `Velocity Trend (${(avgVelocityPerDay * 7).toFixed(1)}/wk)`,
+                            label: `Velocity Trend (${(avgVelocityPerDay * 7).toFixed(1)} SP/wk)`,
                             data: labels.map((_, i) => avgVelocityPerDay * (i + 1)),
                             borderColor: 'rgba(255, 255, 255, 0.4)',
                             borderDash: [5, 5],
@@ -1003,8 +1911,9 @@
             const data = window.lastVelocityData;
             if (!data || !data.sprint_data) return;
 
-            const issues = data.sprint_data.issues || [];
-            document.getElementById('sprint-issues-count').textContent = issues.length;
+            const issues = getFilteredSprintIssues();
+            const totalAll = data.sprint_data.issues?.length || 0;
+            document.getElementById('sprint-issues-count').textContent = window.b4FilterActive ? `${issues.length}/${totalAll}` : issues.length;
 
             // Sort: In Progress first, then To Do, then Done
             const statusOrder = {'In Progress': 0, 'To Do': 1, 'New': 1, 'Backlog': 2, 'Done': 3, 'Closed': 4, 'Dropped': 5};
@@ -1031,31 +1940,35 @@
             const ctx = document.getElementById('velocity-chart').getContext('2d');
             if (window.velocityChart) window.velocityChart.destroy();
 
-            let cumResolved = 0, cumCreated = 0;
-            const initialOpen = data.initial_open || 0;
-            const cumulativeResolved = data.velocity.map(v => { cumResolved += v.resolved; return cumResolved; });
-            cumCreated = 0;
-            const cumulativeCreated = data.velocity.map(v => { cumCreated += v.created; return initialOpen + cumCreated; });
+            // Use B4 or all data based on filter
+            const velocityData = window.b4FilterActive ? data.velocity : (data.velocity_all || data.velocity);
+            const initialOpen = window.b4FilterActive ? (data.initial_open || 0) : (data.initial_open_all || 0);
+            const initialBugs = window.b4FilterActive ? (data.initial_bugs || 0) : (data.initial_bugs_all || 0);
 
-            let openBugs = data.initial_bugs || 0;
-            const openBugsLine = data.velocity.map(v => {
+            let cumResolved = 0, cumCreated = 0;
+            const cumulativeResolved = velocityData.map(v => { cumResolved += v.resolved; return cumResolved; });
+            cumCreated = 0;
+            const cumulativeCreated = velocityData.map(v => { cumCreated += v.created; return initialOpen + cumCreated; });
+
+            let openBugs = initialBugs;
+            const openBugsLine = velocityData.map(v => {
                 openBugs += (v.bugs_created || 0) - (v.bugs_resolved || 0);
                 return openBugs;
             });
 
-            const totalResolved = data.velocity.reduce((sum, v) => sum + v.resolved, 0);
-            const avgVelocity = totalResolved / data.velocity.length;
-            const velocityTrendLine = data.velocity.map((v, i) => avgVelocity * (i + 1));
+            const totalResolved = velocityData.reduce((sum, v) => sum + v.resolved, 0);
+            const avgVelocity = totalResolved / velocityData.length;
+            const velocityTrendLine = velocityData.map((v, i) => avgVelocity * (i + 1));
 
             window.velocityChart = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: data.velocity.map(v => v.week),
+                    labels: velocityData.map(v => v.week),
                     datasets: [
                         { label: 'Open Bugs', data: openBugsLine, borderColor: '#da3633', backgroundColor: 'rgba(218, 54, 51, 0.1)', fill: true, tension: 0.3, borderWidth: 2 },
-                        { label: `Velocity Trend (${avgVelocity.toFixed(1)}/wk)`, data: velocityTrendLine, borderColor: 'rgba(255, 255, 255, 0.4)', borderDash: [5, 5], backgroundColor: 'transparent', fill: false, tension: 0, borderWidth: 2, pointRadius: 0, datalabels: { display: false } },
-                        { label: 'Resolved (cumulative)', data: cumulativeResolved, borderColor: '#238636', backgroundColor: 'rgba(35, 134, 54, 0.1)', fill: true, tension: 0.3 },
-                        { label: 'Created (cumulative)', data: cumulativeCreated, borderColor: '#1f6feb', backgroundColor: 'rgba(31, 111, 235, 0.1)', fill: true, tension: 0.3 }
+                        { label: `Velocity Trend (${avgVelocity.toFixed(1)} SP/wk)`, data: velocityTrendLine, borderColor: 'rgba(255, 255, 255, 0.4)', borderDash: [5, 5], backgroundColor: 'transparent', fill: false, tension: 0, borderWidth: 2, pointRadius: 0, datalabels: { display: false } },
+                        { label: 'SP Resolved (cumulative)', data: cumulativeResolved, borderColor: '#238636', backgroundColor: 'rgba(35, 134, 54, 0.1)', fill: true, tension: 0.3 },
+                        { label: 'SP Created (cumulative)', data: cumulativeCreated, borderColor: '#1f6feb', backgroundColor: 'rgba(31, 111, 235, 0.1)', fill: true, tension: 0.3 }
                     ]
                 },
                 options: {
@@ -1077,7 +1990,78 @@
         function openChartFullscreen() {
             document.getElementById('chart-fullscreen').style.display = 'block';
             document.body.style.overflow = 'hidden';
+            updateFullscreenButtons();
             renderFullscreenChart();
+        }
+
+        function updateFullscreenButtons() {
+            const sprintBtn = document.getElementById('fullscreen-sprint-btn');
+            const b4Btn = document.getElementById('fullscreen-b4-btn');
+            const title = document.getElementById('fullscreen-title');
+            const sprintData = window.lastVelocityData?.sprint_data;
+
+            if (window.sprintViewActive) {
+                sprintBtn.textContent = '📊 8 Week View';
+                sprintBtn.style.background = '#238636';
+                title.textContent = `📈 Velocity (Story Points) (${sprintData?.name || 'Current Sprint'})`;
+            } else {
+                sprintBtn.textContent = '📅 Sprint View';
+                sprintBtn.style.background = '#1f6feb';
+                title.textContent = '📈 Velocity (Story Points) (Last 8 Weeks)';
+            }
+
+            if (window.b4FilterActive) {
+                b4Btn.textContent = '🏷️ B4 Only';
+                b4Btn.style.background = '#238636';
+            } else {
+                b4Btn.textContent = '📋 All Issues';
+                b4Btn.style.background = '#6e7681';
+            }
+        }
+
+        function toggleFullscreenView() {
+            window.sprintViewActive = !window.sprintViewActive;
+            // Update main view buttons too
+            const mainBtn = document.getElementById('sprint-velocity-btn');
+            const mainTitle = document.getElementById('velocity-title');
+            const issuesContainer = document.getElementById('sprint-issues-container');
+            const sprintData = window.lastVelocityData?.sprint_data;
+
+            if (window.sprintViewActive) {
+                mainBtn.textContent = '📊 8 Week View';
+                mainBtn.style.background = '#238636';
+                mainTitle.textContent = `(${sprintData?.name || 'Current Sprint'})`;
+                issuesContainer.style.display = 'block';
+            } else {
+                mainBtn.textContent = '📅 Sprint View';
+                mainBtn.style.background = '#1f6feb';
+                mainTitle.textContent = '(Last 8 Weeks)';
+                issuesContainer.style.display = 'none';
+            }
+
+            updateFullscreenButtons();
+            renderFullscreenChart();
+        }
+
+        function toggleFullscreenB4Filter() {
+            window.b4FilterActive = !window.b4FilterActive;
+            // Update main view button too
+            const mainBtn = document.getElementById('b4-filter-btn');
+
+            if (window.b4FilterActive) {
+                mainBtn.textContent = '🏷️ B4 Only';
+                mainBtn.style.background = '#238636';
+            } else {
+                mainBtn.textContent = '📋 All Issues';
+                mainBtn.style.background = '#6e7681';
+            }
+
+            updateFullscreenButtons();
+            renderFullscreenChart();
+            // Update sprint issues table if visible
+            if (window.sprintViewActive) {
+                renderSprintIssues();
+            }
         }
 
         function closeChartFullscreen() {
@@ -1096,31 +2080,43 @@
 
             if (window.velocityChartFull) window.velocityChartFull.destroy();
 
-            // Same chart config as main chart
-            let cumResolved = 0, cumCreated = 0;
-            const initialOpen = data.initial_open || 0;
-            const cumulativeResolved = data.velocity.map(v => { cumResolved += v.resolved; return cumResolved; });
-            const cumulativeCreated = data.velocity.map(v => { cumCreated += v.created; return initialOpen + cumCreated; });
+            // Render sprint or 8-week view based on current state
+            if (window.sprintViewActive) {
+                renderFullscreenSprintChart(ctx, data);
+            } else {
+                renderFullscreen8WeekChart(ctx, data);
+            }
+        }
 
-            let openBugs = data.initial_bugs || 0;
-            const openBugsLine = data.velocity.map(v => {
+        function renderFullscreen8WeekChart(ctx, data) {
+            // Use B4 or all data based on filter
+            const velocityData = window.b4FilterActive ? data.velocity : (data.velocity_all || data.velocity);
+            const initialOpen = window.b4FilterActive ? (data.initial_open || 0) : (data.initial_open_all || 0);
+            const initialBugs = window.b4FilterActive ? (data.initial_bugs || 0) : (data.initial_bugs_all || 0);
+
+            let cumResolved = 0, cumCreated = 0;
+            const cumulativeResolved = velocityData.map(v => { cumResolved += v.resolved; return cumResolved; });
+            const cumulativeCreated = velocityData.map(v => { cumCreated += v.created; return initialOpen + cumCreated; });
+
+            let openBugs = initialBugs;
+            const openBugsLine = velocityData.map(v => {
                 openBugs += (v.bugs_created || 0) - (v.bugs_resolved || 0);
                 return openBugs;
             });
 
-            const totalResolved = data.velocity.reduce((sum, v) => sum + v.resolved, 0);
-            const avgVelocity = totalResolved / data.velocity.length;
-            const velocityTrendLine = data.velocity.map((v, i) => avgVelocity * (i + 1));
+            const totalResolved = velocityData.reduce((sum, v) => sum + v.resolved, 0);
+            const avgVelocity = totalResolved / velocityData.length;
+            const velocityTrendLine = velocityData.map((v, i) => avgVelocity * (i + 1));
 
             window.velocityChartFull = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: data.velocity.map(v => v.week),
+                    labels: velocityData.map(v => v.week),
                     datasets: [
                         { label: 'Open Bugs', data: openBugsLine, borderColor: '#da3633', backgroundColor: 'rgba(218, 54, 51, 0.1)', fill: true, tension: 0.3, borderWidth: 3 },
-                        { label: `Velocity Trend (${avgVelocity.toFixed(1)}/wk)`, data: velocityTrendLine, borderColor: 'rgba(255, 255, 255, 0.4)', borderDash: [5, 5], backgroundColor: 'transparent', fill: false, tension: 0, borderWidth: 2, pointRadius: 0, datalabels: { display: false } },
-                        { label: 'Resolved (cumulative)', data: cumulativeResolved, borderColor: '#238636', backgroundColor: 'rgba(35, 134, 54, 0.1)', fill: true, tension: 0.3, borderWidth: 3 },
-                        { label: 'Created (cumulative)', data: cumulativeCreated, borderColor: '#1f6feb', backgroundColor: 'rgba(31, 111, 235, 0.1)', fill: true, tension: 0.3, borderWidth: 3 }
+                        { label: `Velocity Trend (${avgVelocity.toFixed(1)} SP/wk)`, data: velocityTrendLine, borderColor: 'rgba(255, 255, 255, 0.4)', borderDash: [5, 5], backgroundColor: 'transparent', fill: false, tension: 0, borderWidth: 2, pointRadius: 0, datalabels: { display: false } },
+                        { label: 'SP Resolved (cumulative)', data: cumulativeResolved, borderColor: '#238636', backgroundColor: 'rgba(35, 134, 54, 0.1)', fill: true, tension: 0.3, borderWidth: 3 },
+                        { label: 'SP Created (cumulative)', data: cumulativeCreated, borderColor: '#1f6feb', backgroundColor: 'rgba(31, 111, 235, 0.1)', fill: true, tension: 0.3, borderWidth: 3 }
                     ]
                 },
                 options: {
@@ -1129,6 +2125,68 @@
                     plugins: {
                         legend: { reverse: true, labels: { color: '#c9d1d9', font: { size: 14 } } },
                         datalabels: { display: (ctx) => ctx.dataIndex % 2 === 1, color: '#c9d1d9', font: { size: 12 }, anchor: 'end', align: 'top' }
+                    },
+                    scales: {
+                        x: { ticks: { color: '#c9d1d9', font: { size: 14 } }, grid: { color: '#21262d' } },
+                        y: { ticks: { color: '#c9d1d9', font: { size: 14 } }, grid: { color: '#21262d' }, beginAtZero: true }
+                    }
+                },
+                plugins: [ChartDataLabels]
+            });
+        }
+
+        function renderFullscreenSprintChart(ctx, data) {
+            const sprintData = data.sprint_data;
+            const issues = getFilteredSprintIssues();
+            const sprintStart = sprintData.start ? new Date(sprintData.start) : new Date(Date.now() - 14*24*60*60*1000);
+            const sprintEnd = sprintData.end ? new Date(sprintData.end) : new Date();
+            const total = issues.length;
+
+            const labels = [];
+            const cumulativeResolved = [];
+            const cumulativeCreated = [];
+
+            let currentDate = new Date(sprintStart);
+            const dayMs = 24 * 60 * 60 * 1000;
+            let dayIndex = 0;
+
+            while (currentDate <= sprintEnd || dayIndex < 14) {
+                const dateStr = currentDate.toISOString().split('T')[0];
+                labels.push(`${currentDate.getMonth()+1}/${currentDate.getDate()}`);
+                const resolvedByDate = issues.filter(i => i.resolved && i.resolved <= dateStr && ['Done', 'Closed'].includes(i.status)).length;
+                cumulativeResolved.push(resolvedByDate);
+                const createdByDate = issues.filter(i => i.created && i.created <= dateStr).length;
+                cumulativeCreated.push(createdByDate);
+                currentDate = new Date(currentDate.getTime() + dayMs);
+                dayIndex++;
+                if (dayIndex > 14) break;
+            }
+
+            const done = issues.filter(i => ['Done', 'Closed'].includes(i.status)).length;
+            const remaining = total - done;
+
+            // Use 8-week velocity based on current B4 filter setting
+            const velocitySource = window.b4FilterActive ? data.velocity : (data.velocity_all || data.velocity);
+            const totalResolved8wk = velocitySource ? velocitySource.reduce((sum, v) => sum + v.resolved, 0) : 0;
+            const avgVelocityPerDay = totalResolved8wk / 56;
+
+            window.velocityChartFull = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        { label: `Velocity Trend (${(avgVelocityPerDay * 7).toFixed(1)} SP/wk)`, data: labels.map((_, i) => avgVelocityPerDay * (i + 1)), borderColor: 'rgba(255, 255, 255, 0.4)', borderDash: [5, 5], backgroundColor: 'transparent', fill: false, tension: 0, borderWidth: 2, pointRadius: 0, datalabels: { display: false } },
+                        { label: `Resolved (${done}/${total})`, data: cumulativeResolved, borderColor: '#238636', backgroundColor: 'rgba(35, 134, 54, 0.1)', fill: true, tension: 0.3, borderWidth: 3 },
+                        { label: `Total in Sprint (${total})`, data: cumulativeCreated, borderColor: '#1f6feb', backgroundColor: 'rgba(31, 111, 235, 0.1)', fill: true, tension: 0.3, borderWidth: 3 }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { reverse: true, labels: { color: '#c9d1d9', font: { size: 14 } } },
+                        datalabels: { display: false },
+                        title: { display: true, text: `Sprint: ${done}/${total} completed (${Math.round(done/total*100)}%) - ${remaining} remaining`, color: '#c9d1d9', font: { size: 16 } }
                     },
                     scales: {
                         x: { ticks: { color: '#c9d1d9', font: { size: 14 } }, grid: { color: '#21262d' } },
@@ -1173,8 +2231,8 @@
         }
 
         loadDashboard();
-        // Auto-refresh every 5 minutes
-        setInterval(loadDashboard, 300000);
+        // Auto-refresh every 5 minutes (skip JIRA refresh, just reload cached data)
+        setInterval(() => loadDashboard(true), 300000);
     </script>
 </body>
 </html>
