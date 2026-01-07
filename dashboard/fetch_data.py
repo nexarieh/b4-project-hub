@@ -137,7 +137,7 @@ def fetch_jira_issues(auth, jql, max_results=50):
     params = {
         'jql': jql,
         'maxResults': max_results,
-        'fields': 'summary,status,priority,assignee,created,updated,fixVersions,versions,labels'
+        'fields': 'summary,status,priority,assignee,created,updated,fixVersions,versions,labels,customfield_10124'
     }
 
     response = requests.get(url, auth=auth, params=params)
@@ -157,6 +157,9 @@ def fetch_b4_bugs(auth):
         # Get affected versions (version found)
         versions = fields.get('versions', [])
         version_found = versions[0].get('name', '-') if versions else '-'
+        # Get story points (default to 2 if not set)
+        sp = fields.get('customfield_10124')
+        story_points = int(sp) if sp else 2
         bugs.append({
             'key': issue['key'],
             'summary': fields.get('summary', '')[:60],
@@ -165,6 +168,7 @@ def fetch_b4_bugs(auth):
             'assignee': fields.get('assignee', {}).get('displayName', 'Unassigned') if fields.get('assignee') else 'Unassigned',
             'version': version_found,
             'created': fields.get('created', '')[:10],  # YYYY-MM-DD
+            'story_points': story_points,
             'url': f"https://getnexar.atlassian.net/browse/{issue['key']}"
         })
 
@@ -182,6 +186,9 @@ def fetch_fs_tickets(auth):
         # Get affected versions (version discovered)
         versions = fields.get('versions', [])
         version_discovered = versions[0].get('name', '-') if versions else '-'
+        # Get story points (default to 2 if not set)
+        sp = fields.get('customfield_10124')
+        story_points = int(sp) if sp else 2
         tickets.append({
             'key': issue['key'],
             'summary': fields.get('summary', '')[:55],
@@ -189,6 +196,32 @@ def fetch_fs_tickets(auth):
             'priority': fields.get('priority', {}).get('name', 'Unknown') if fields.get('priority') else 'Unknown',
             'assignee': fields.get('assignee', {}).get('displayName', 'Unassigned') if fields.get('assignee') else 'Unassigned',
             'version': version_discovered,
+            'story_points': story_points,
+            'url': f"https://getnexar.atlassian.net/browse/{issue['key']}"
+        })
+
+    return tickets
+
+
+def fetch_ft_tickets(auth):
+    """Fetch B4 field test tickets from FT project."""
+    jql = 'project = FT AND labels = Beam4k AND status not in (Done, Closed) ORDER BY priority ASC, updated DESC'
+    issues = fetch_jira_issues(auth, jql, 30)
+
+    tickets = []
+    for issue in issues:
+        fields = issue['fields']
+        # Get story points (default to 2 if not set)
+        sp = fields.get('customfield_10124')
+        story_points = int(sp) if sp else 2
+        tickets.append({
+            'key': issue['key'],
+            'summary': fields.get('summary', '')[:55],
+            'status': fields.get('status', {}).get('name', 'Unknown'),
+            'priority': fields.get('priority', {}).get('name', 'Unknown') if fields.get('priority') else 'Unknown',
+            'assignee': fields.get('assignee', {}).get('displayName', 'Unassigned') if fields.get('assignee') else 'Unassigned',
+            'story_points': story_points,
+            'created': fields.get('created', '')[:10],  # YYYY-MM-DD
             'url': f"https://getnexar.atlassian.net/browse/{issue['key']}"
         })
 
@@ -229,12 +262,15 @@ def fetch_top_priorities(auth):
     sprint_issues = []
     url_search = 'https://getnexar.atlassian.net/rest/api/3/search/jql'
     jql = f'sprint = {active_sprint_id} AND issuetype in (Task, Story, Bug)'
-    params = {'jql': jql, 'maxResults': 200, 'fields': 'summary,status,issuetype,resolutiondate,created,labels'}
+    params = {'jql': jql, 'maxResults': 200, 'fields': 'summary,status,issuetype,resolutiondate,created,labels,customfield_10124'}
     response = requests.get(url_search, auth=auth, params=params)
     if response.status_code == 200:
         for issue in response.json().get('issues', []):
             fields = issue['fields']
             labels = fields.get('labels', [])
+            # Get story points (default to 2 if not set)
+            sp = fields.get('customfield_10124')
+            story_points = int(sp) if sp else 2
             sprint_issues.append({
                 'key': issue['key'],
                 'summary': fields.get('summary', '')[:60],
@@ -242,7 +278,8 @@ def fetch_top_priorities(auth):
                 'type': fields.get('issuetype', {}).get('name', ''),
                 'resolved': fields.get('resolutiondate', '')[:10] if fields.get('resolutiondate') else None,
                 'created': fields.get('created', '')[:10] if fields.get('created') else None,
-                'is_b4': 'Beam4k' in labels
+                'is_b4': 'Beam4k' in labels,
+                'story_points': story_points
             })
 
     # Fetch priorities by P1, P2, then P3 (B4 issues only, exclude Done/Closed/Dropped)
@@ -285,8 +322,8 @@ def fetch_velocity_data(auth, b4_only=True):
     today = datetime.now()
     url = 'https://getnexar.atlassian.net/rest/api/3/search/jql'
 
-    # Story points field
-    story_points_field = 'customfield_10421'
+    # Story points field (customfield_10124 is what the board displays)
+    story_points_field = 'customfield_10124'
     default_points = 2  # Default story points if not set
 
     def sum_story_points(issues):
@@ -362,8 +399,8 @@ def fetch_team_velocity(auth):
     today = datetime.now()
     url = 'https://getnexar.atlassian.net/rest/api/3/search/jql'
 
-    # Story points field
-    story_points_field = 'customfield_10421'
+    # Story points field (customfield_10124 is what the board displays)
+    story_points_field = 'customfield_10124'
     default_points = 2  # Default story points if not set
 
     team_velocity = {}
@@ -396,13 +433,17 @@ def fetch_team_velocity(auth):
     return {'data': team_velocity, 'weeks': weeks_data}
 
 
-def fetch_workload(auth):
-    """Fetch current workload per person (all open B4 issues)."""
+def fetch_workload(auth, sprint_id):
+    """Fetch current workload per person based on story points (active sprint issues only)."""
     url = 'https://getnexar.atlassian.net/rest/api/3/search/jql'
 
-    # Include all open issues (not Done/Closed/Dropped)
-    jql = 'project = FS AND labels = Beam4k AND status not in (Done, Closed, Dropped) AND assignee is not EMPTY'
-    params = {'jql': jql, 'maxResults': 200, 'fields': 'assignee,status,priority'}
+    # Story points field and default
+    story_points_field = 'customfield_10124'
+    default_points = 2
+
+    # Include only active sprint issues (not Done/Closed/Dropped)
+    jql = f'sprint = {sprint_id} AND status not in (Done, Closed, Dropped) AND assignee is not EMPTY'
+    params = {'jql': jql, 'maxResults': 200, 'fields': f'assignee,status,priority,{story_points_field}'}
     response = requests.get(url, auth=auth, params=params)
 
     workload = {}
@@ -411,17 +452,19 @@ def fetch_workload(auth):
             assignee = issue['fields'].get('assignee', {}).get('displayName', 'Unknown')
             status = issue['fields'].get('status', {}).get('name', '')
             priority = issue['fields'].get('priority', {}).get('name', '') if issue['fields'].get('priority') else ''
+            sp = issue['fields'].get(story_points_field)
+            points = int(sp) if sp else default_points
 
             if assignee not in workload:
                 workload[assignee] = {'in_progress': 0, 'todo': 0, 'high_priority': 0}
 
             if status == 'In Progress':
-                workload[assignee]['in_progress'] += 1
+                workload[assignee]['in_progress'] += points
             else:
-                workload[assignee]['todo'] += 1
+                workload[assignee]['todo'] += points
 
             if priority in ['P1 - High', 'Highest']:
-                workload[assignee]['high_priority'] += 1
+                workload[assignee]['high_priority'] += points
 
     return workload
 
@@ -451,6 +494,11 @@ def main():
     print("Fetching FS tickets...")
     tickets = fetch_fs_tickets(auth)
     print(f"  Found {len(tickets)} tickets")
+
+    # Fetch FT tickets
+    print("Fetching FT field test tickets...")
+    ft_tickets = fetch_ft_tickets(auth)
+    print(f"  Found {len(ft_tickets)} FT tickets")
 
     # Fetch latest sprint planning page
     print("Finding latest sprint planning page...")
@@ -482,11 +530,6 @@ def main():
     team_velocity = fetch_team_velocity(auth)
     print(f"  Found data for {len(team_velocity['data'])} team members")
 
-    # Fetch workload data
-    print("Fetching workload...")
-    workload = fetch_workload(auth)
-    print(f"  Found workload for {len(workload)} team members")
-
     # Fetch top priorities from active sprint
     print("Fetching top priorities...")
     priorities_result = fetch_top_priorities(auth)
@@ -506,9 +549,15 @@ def main():
         sprint_issues = []
     print(f"  Found {len(priorities)} priorities, {len(sprint_issues)} sprint issues")
 
+    # Fetch workload data (needs sprint_id)
+    print("Fetching workload...")
+    workload = fetch_workload(auth, active_sprint_id) if active_sprint_id else {}
+    print(f"  Found workload for {len(workload)} team members")
+
     # Calculate metrics
     status_counts = get_status_counts(tickets)
     bug_counts = get_status_counts(bugs)
+    ft_counts = get_status_counts(ft_tickets)
 
     # Build dashboard data
     dashboard_data = {
@@ -548,11 +597,14 @@ def main():
         'workload': workload,
         'bugs': bugs,
         'tickets': tickets,
+        'ft_tickets': ft_tickets,
         'metrics': {
             'total_bugs': len(bugs),
             'total_tickets': len(tickets),
+            'total_ft_tickets': len(ft_tickets),
             'bug_status': bug_counts,
-            'ticket_status': status_counts
+            'ticket_status': status_counts,
+            'ft_status': ft_counts
         },
         'links': {
             'timeline': 'https://getnexar.atlassian.net/jira/software/c/projects/FS/boards/268/timeline?statuses=2%2C4&timeline=MONTHS',
@@ -562,6 +614,7 @@ def main():
             'chicony_jira': 'https://nexar-chicony.atlassian.net/jira/core/projects/B4/board?filter=&groupBy=status',
             'dastic_jira': 'https://nexar-chicony.atlassian.net/jira/core/projects/DAS/board?filter=&groupBy=status',
             'br_bugs': 'https://getnexar.atlassian.net/jira/software/c/projects/BR/boards/287/backlog?issueParent=109691',
+            'ft_tickets': 'https://getnexar.atlassian.net/issues/?jql=project%20%3D%20FT%20AND%20labels%20%3D%20Beam4k%20AND%20status%20not%20in%20(Done%2C%20Closed)',
             'sprint_planning': f'https://getnexar.atlassian.net/wiki/spaces/EMB/pages/{sprint_id}',
             'sprint_title': sprint_title,
             'serial_numbers': 'https://docs.google.com/spreadsheets/d/1ZAwoMznI-whqYJFvrwy9SrFTTNGQiMq62E_86qvR_sw/edit?gid=243956152#gid=243956152',
@@ -587,6 +640,7 @@ def main():
     print(f"\nData saved to: {output_file}")
     print(f"Total bugs: {len(bugs)}")
     print(f"Total tickets: {len(tickets)}")
+    print(f"Total FT tickets: {len(ft_tickets)}")
 
 
 if __name__ == '__main__':

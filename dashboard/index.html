@@ -398,7 +398,7 @@
                                     <th>Summary</th>
                                     <th>Type</th>
                                     <th>Status</th>
-                                    <th>SP Resolved</th>
+                                    <th>SP</th>
                                 </tr>
                             </thead>
                             <tbody id="sprint-issues-body"></tbody>
@@ -465,7 +465,7 @@
                 <!-- Workload Balance -->
                 <div class="card">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #30363d;">
-                        <h2 style="margin: 0; border: none; padding: 0;">⚖️ Current Workload</h2>
+                        <h2 style="margin: 0; border: none; padding: 0;">⚖️ Current Workload (SP)</h2>
                     </div>
                     <div class="chart-container" style="height: 320px;">
                         <canvas id="workload-chart"></canvas>
@@ -495,6 +495,7 @@
                                 <th class="sortable" onclick="sortBugs('assignee')">Assignee <span id="bugs-sort-assignee"></span></th>
                                 <th class="sortable" onclick="sortBugs('priority')">Priority <span id="bugs-sort-priority"></span></th>
                                 <th class="sortable" onclick="sortBugs('version')">Version <span id="bugs-sort-version"></span></th>
+                                <th class="sortable" onclick="sortBugs('story_points')">SP <span id="bugs-sort-story_points"></span></th>
                                 <th class="sortable" onclick="sortBugs('age')">Age <span id="bugs-sort-age"></span></th>
                             </tr>
                         </thead>
@@ -523,11 +524,39 @@
                                 <th class="sortable" onclick="sortTickets('assignee')">Assignee <span id="tickets-sort-assignee"></span></th>
                                 <th class="sortable" onclick="sortTickets('priority')">Priority <span id="tickets-sort-priority"></span></th>
                                 <th class="sortable" onclick="sortTickets('version')">Version <span id="tickets-sort-version"></span></th>
+                                <th class="sortable" onclick="sortTickets('story_points')">SP <span id="tickets-sort-story_points"></span></th>
                             </tr>
                         </thead>
                         <tbody id="tickets-body">Loading...</tbody>
                     </table>
                     <div class="pagination" id="tickets-pagination"></div>
+                </div>
+
+                <!-- FT Field Test (full width) -->
+                <div class="card">
+                    <h2><a id="ft-link" href="#" target="_blank" style="color: inherit; text-decoration: none;">🧪 FT Field Test (<span id="ft-count">0</span>) ↗</a></h2>
+                    <div class="filter-presets" style="margin-bottom: 8px;">
+                        <button onclick="applyFtPreset('unassigned')" class="preset-btn">Unassigned</button>
+                        <button onclick="applyFtPreset('in_progress')" class="preset-btn">In Progress</button>
+                        <button onclick="applyFtPreset('high_priority')" class="preset-btn">High Priority</button>
+                        <button onclick="clearFtFilter()" class="preset-btn" style="background:#30363d;">All</button>
+                    </div>
+                    <div id="ft-filter" class="filter-bar" style="display:none;"></div>
+                    <table id="ft-table" style="width: 100%;">
+                        <thead>
+                            <tr>
+                                <th class="sortable" onclick="sortFt('key')">Key <span id="ft-sort-key"></span></th>
+                                <th class="sortable" onclick="sortFt('summary')">Summary <span id="ft-sort-summary"></span></th>
+                                <th class="sortable" onclick="sortFt('status')">Status <span id="ft-sort-status"></span></th>
+                                <th class="sortable" onclick="sortFt('assignee')">Assignee <span id="ft-sort-assignee"></span></th>
+                                <th class="sortable" onclick="sortFt('priority')">Priority <span id="ft-sort-priority"></span></th>
+                                <th class="sortable" onclick="sortFt('story_points')">SP <span id="ft-sort-story_points"></span></th>
+                                <th class="sortable" onclick="sortFt('age')">Age <span id="ft-sort-age"></span></th>
+                            </tr>
+                        </thead>
+                        <tbody id="ft-body">Loading...</tbody>
+                    </table>
+                    <div class="pagination" id="ft-pagination"></div>
                 </div>
             </div>
         </div>
@@ -765,21 +794,15 @@
                     labels,
                     datasets: [
                         {
-                            label: 'In Progress',
+                            label: 'In Progress (SP)',
                             data: members.map(m => workload[m].in_progress),
                             backgroundColor: '#238636',
                             borderRadius: 2
                         },
                         {
-                            label: 'To Do',
+                            label: 'To Do (SP)',
                             data: members.map(m => workload[m].todo),
                             backgroundColor: '#1f6feb',
-                            borderRadius: 2
-                        },
-                        {
-                            label: 'High Priority',
-                            data: members.map(m => workload[m].high_priority),
-                            backgroundColor: '#da3633',
                             borderRadius: 2
                         }
                     ]
@@ -807,6 +830,7 @@
         function exportToCSV() {
             const bugs = window.bugsData || [];
             const tickets = window.ticketsData || [];
+            const ftTickets = window.ftData || [];
             const dateStr = new Date().toISOString().split('T')[0];
 
             let csv = 'Type,Key,Summary,Status,Priority,Assignee,Version,Age (days)\n';
@@ -820,6 +844,12 @@
             tickets.forEach(t => {
                 const summary = (t.summary || '').replace(/"/g, '""').replace(/,/g, ' ');
                 csv += `Ticket,"${t.key}","${summary}","${t.status}","${t.priority || '-'}","${t.assignee}","${t.version || '-'}",-\n`;
+            });
+
+            ftTickets.forEach(t => {
+                const age = calculateBugAge(t.created);
+                const summary = (t.summary || '').replace(/"/g, '""').replace(/,/g, ' ');
+                csv += `FT,"${t.key}","${summary}","${t.status}","${t.priority || '-'}","${t.assignee}","-",${age}\n`;
             });
 
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
@@ -837,6 +867,7 @@
 
             const bugs = window.bugsData || [];
             const tickets = window.ticketsData || [];
+            const ftTickets = window.ftData || [];
             const avgAge = document.getElementById('avg-bug-age')?.textContent || '-';
 
             // Calculate velocity
@@ -1048,6 +1079,7 @@ P - Print summary view
                 const q = query.toLowerCase();
                 const bugs = window.bugsData || [];
                 const tickets = window.ticketsData || [];
+                const ftTickets = window.ftData || [];
 
                 const matchingBugs = bugs.filter(b =>
                     b.key.toLowerCase().includes(q) ||
@@ -1061,7 +1093,13 @@ P - Print summary view
                     t.assignee.toLowerCase().includes(q)
                 ).slice(0, 5);
 
-                if (matchingBugs.length === 0 && matchingTickets.length === 0) {
+                const matchingFt = ftTickets.filter(t =>
+                    t.key.toLowerCase().includes(q) ||
+                    t.summary.toLowerCase().includes(q) ||
+                    t.assignee.toLowerCase().includes(q)
+                ).slice(0, 5);
+
+                if (matchingBugs.length === 0 && matchingTickets.length === 0 && matchingFt.length === 0) {
                     dropdown.innerHTML = '<div style="padding:12px;color:#8b949e;">No results found</div>';
                 } else {
                     dropdown.innerHTML = `
@@ -1074,6 +1112,13 @@ P - Print summary view
                         `).join('')}
                         ${matchingTickets.length ? '<div style="padding:8px 12px;color:#8b949e;font-size:11px;text-transform:uppercase;border-bottom:1px solid #30363d;">Tickets</div>' : ''}
                         ${matchingTickets.map(t => `
+                            <div onclick="window.open('${t.url}', '_blank')" style="padding:10px 12px;cursor:pointer;border-bottom:1px solid #21262d;display:flex;justify-content:space-between;" onmouseover="this.style.background='#21262d'" onmouseout="this.style.background='transparent'">
+                                <span><strong style="color:#58a6ff;">${t.key}</strong> <span style="color:#8b949e;">- ${t.summary.substring(0, 40)}...</span></span>
+                                <span style="color:#8b949e;font-size:12px;">${t.status}</span>
+                            </div>
+                        `).join('')}
+                        ${matchingFt.length ? '<div style="padding:8px 12px;color:#8b949e;font-size:11px;text-transform:uppercase;border-bottom:1px solid #30363d;">Field Test</div>' : ''}
+                        ${matchingFt.map(t => `
                             <div onclick="window.open('${t.url}', '_blank')" style="padding:10px 12px;cursor:pointer;border-bottom:1px solid #21262d;display:flex;justify-content:space-between;" onmouseover="this.style.background='#21262d'" onmouseout="this.style.background='transparent'">
                                 <span><strong style="color:#58a6ff;">${t.key}</strong> <span style="color:#8b949e;">- ${t.summary.substring(0, 40)}...</span></span>
                                 <span style="color:#8b949e;font-size:12px;">${t.status}</span>
@@ -1237,6 +1282,7 @@ P - Print summary view
                     <div class="dropdown-menu">
                         <a href="${data.links.jira_board}" target="_blank">FS Board (Backlog)</a>
                         <a href="${data.links.br_bugs}" target="_blank">BR Bugs (Beam4)</a>
+                        <a href="${data.links.ft_tickets}" target="_blank">FT Tickets (Beam4k)</a>
                     </div>
                 </div>
                 <div class="dropdown">
@@ -1300,6 +1346,14 @@ P - Print summary view
             document.getElementById('tickets-count').textContent = data.tickets.length;
             document.getElementById('tickets-link').href = data.links.jira_board;
             renderTicketsPage();
+
+            // FT tickets table with pagination
+            window.ftData = data.ft_tickets || [];
+            window.ftPage = 1;
+            window.ftPerPage = 10;
+            document.getElementById('ft-count').textContent = window.ftData.length;
+            document.getElementById('ft-link').href = data.links.ft_tickets || '#';
+            renderFtPage();
 
             // Velocity Chart - Cumulative
             if (data.velocity && data.velocity.length > 0) {
@@ -1418,8 +1472,8 @@ P - Print summary view
                 const result = await response.json();
 
                 if (result.success) {
-                    // Reload the dashboard with new data
-                    await loadDashboard();
+                    // Reload the dashboard with new data (skip JIRA - already fetched above)
+                    await loadDashboard(true);
                     btn.textContent = '✅ Updated!';
                 } else {
                     btn.textContent = '❌ ' + (result.message || 'Failed');
@@ -1473,10 +1527,11 @@ P - Print summary view
                     <td class="clickable" onclick="filterBugs('assignee','${bug.assignee}')">${bug.assignee}</td>
                     <td class="clickable" onclick="filterBugs('priority','${bug.priority || '-'}')">${bug.priority || '-'}</td>
                     <td class="clickable" onclick="filterBugs('version','${bug.version || '-'}')">${bug.version || '-'}</td>
+                    <td style="text-align:center;">${bug.story_points || 2}</td>
                     <td style="${ageStyle}">${age}d</td>
                 </tr>`;
             }).join('');
-            document.getElementById('bugs-body').innerHTML = html || '<tr><td colspan="7">No bugs</td></tr>';
+            document.getElementById('bugs-body').innerHTML = html || '<tr><td colspan="8">No bugs</td></tr>';
 
             let paginationHtml = `<button onclick="window.bugsPage=1; renderBugsPage()" ${window.bugsPage === 1 ? 'disabled' : ''}>&laquo;</button>`;
             paginationHtml += `<button onclick="window.bugsPage--; renderBugsPage()" ${window.bugsPage === 1 ? 'disabled' : ''}>&lsaquo; Prev</button>`;
@@ -1639,9 +1694,10 @@ P - Print summary view
                     <td class="clickable" onclick="filterTickets('assignee','${t.assignee}')">${t.assignee}</td>
                     <td class="clickable" onclick="filterTickets('priority','${t.priority || '-'}')">${t.priority || '-'}</td>
                     <td class="clickable" onclick="filterTickets('version','${t.version || '-'}')">${t.version || '-'}</td>
+                    <td style="text-align:center;">${t.story_points || 2}</td>
                 </tr>
             `).join('');
-            document.getElementById('tickets-body').innerHTML = html || '<tr><td colspan="6">No tickets</td></tr>';
+            document.getElementById('tickets-body').innerHTML = html || '<tr><td colspan="7">No tickets</td></tr>';
 
             // Pagination controls
             let paginationHtml = `<button onclick="window.ticketsPage=1; renderTicketsPage()" ${window.ticketsPage === 1 ? 'disabled' : ''}>&laquo;</button>`;
@@ -1663,6 +1719,137 @@ P - Print summary view
             window.ticketsPage = 1;
             updatePresetButtons('tickets', null);
             renderTicketsPage();
+        }
+
+        // FT Field Test table functions
+        function renderFtPage() {
+            // Apply filter if set
+            let filteredData = window.ftData || [];
+            if (window.ftFilter) {
+                if (window.ftFilter.custom && window.ftFilter.fn) {
+                    filteredData = filteredData.filter(window.ftFilter.fn);
+                    document.getElementById('ft-filter').style.display = 'flex';
+                    document.getElementById('ft-filter').innerHTML = `<span>Filtered by:</span> <span class="filter-value">${window.ftFilter.label}</span> <button onclick="clearFtFilter()">✕ Clear</button>`;
+                } else {
+                    filteredData = filteredData.filter(t => t[window.ftFilter.field] === window.ftFilter.value);
+                    document.getElementById('ft-filter').style.display = 'flex';
+                    document.getElementById('ft-filter').innerHTML = `<span>Filtered by:</span> <span class="filter-value">${window.ftFilter.field} = "${window.ftFilter.value}"</span> <button onclick="clearFtFilter()">✕ Clear</button>`;
+                }
+            } else {
+                document.getElementById('ft-filter').style.display = 'none';
+            }
+
+            const start = (window.ftPage - 1) * window.ftPerPage;
+            const end = start + window.ftPerPage;
+            const pageData = filteredData.slice(start, end);
+            const totalPages = Math.ceil(filteredData.length / window.ftPerPage) || 1;
+
+            const html = pageData.map(t => {
+                const age = calculateBugAge(t.created);
+                const ageStyle = getAgeStyle(age);
+                return `
+                <tr>
+                    <td><a class="ticket-link" href="${t.url}" target="_blank">${t.key}</a></td>
+                    <td class="truncate" title="${t.summary}">${t.summary}</td>
+                    <td><span class="status-badge status-${t.status.toLowerCase().replace(' ', '-')} clickable" onclick="filterFt('status','${t.status}')">${t.status}</span></td>
+                    <td class="clickable" onclick="filterFt('assignee','${t.assignee}')">${t.assignee}</td>
+                    <td class="clickable" onclick="filterFt('priority','${t.priority || '-'}')">${t.priority || '-'}</td>
+                    <td style="text-align:center;">${t.story_points || 2}</td>
+                    <td style="${ageStyle}">${age}d</td>
+                </tr>`;
+            }).join('');
+            document.getElementById('ft-body').innerHTML = html || '<tr><td colspan="7">No FT tickets with Beam4k label</td></tr>';
+
+            // Pagination controls
+            let paginationHtml = `<button onclick="window.ftPage=1; renderFtPage()" ${window.ftPage === 1 ? 'disabled' : ''}>&laquo;</button>`;
+            paginationHtml += `<button onclick="window.ftPage--; renderFtPage()" ${window.ftPage === 1 ? 'disabled' : ''}>&lsaquo; Prev</button>`;
+            paginationHtml += `<span class="page-info">${window.ftPage} / ${totalPages} (${filteredData.length})</span>`;
+            paginationHtml += `<button onclick="window.ftPage++; renderFtPage()" ${window.ftPage >= totalPages ? 'disabled' : ''}>Next &rsaquo;</button>`;
+            paginationHtml += `<button onclick="window.ftPage=${totalPages}; renderFtPage()" ${window.ftPage >= totalPages ? 'disabled' : ''}>&raquo;</button>`;
+            document.getElementById('ft-pagination').innerHTML = paginationHtml;
+        }
+
+        function filterFt(field, value) {
+            window.ftFilter = { field, value };
+            window.ftPage = 1;
+            renderFtPage();
+        }
+
+        function clearFtFilter() {
+            window.ftFilter = null;
+            window.ftPage = 1;
+            updatePresetButtons('ft', null);
+            renderFtPage();
+        }
+
+        function applyFtPreset(preset) {
+            let filterFn, filterLabel;
+
+            switch (preset) {
+                case 'unassigned':
+                    filterFn = t => t.assignee === 'Unassigned';
+                    filterLabel = 'assignee = Unassigned';
+                    break;
+                case 'in_progress':
+                    filterFn = t => t.status === 'In Progress' || t.status === 'On L2 Support';
+                    filterLabel = 'status = In Progress';
+                    break;
+                case 'high_priority':
+                    filterFn = t => t.priority && (t.priority.includes('High') || t.priority.includes('P1'));
+                    filterLabel = 'priority = High';
+                    break;
+                default:
+                    clearFtFilter();
+                    return;
+            }
+
+            window.ftFilter = { custom: true, fn: filterFn, label: filterLabel };
+            window.ftPage = 1;
+            updatePresetButtons('ft', preset);
+            renderFtPage();
+        }
+
+        function sortFt(field) {
+            // Toggle sort direction
+            if (window.ftSortField === field) {
+                window.ftSortDir = window.ftSortDir === 'asc' ? 'desc' : 'asc';
+            } else {
+                window.ftSortField = field;
+                window.ftSortDir = 'asc';
+            }
+
+            // Sort data
+            window.ftData.sort((a, b) => {
+                // Special handling for age (numeric sort based on created date)
+                if (field === 'age') {
+                    const ageA = calculateBugAge(a.created);
+                    const ageB = calculateBugAge(b.created);
+                    return window.ftSortDir === 'asc' ? ageA - ageB : ageB - ageA;
+                }
+                // Numeric sort for story_points
+                if (field === 'story_points') {
+                    const valA = a[field] || 2;
+                    const valB = b[field] || 2;
+                    return window.ftSortDir === 'asc' ? valA - valB : valB - valA;
+                }
+                // String sort for other fields
+                let valA = (a[field] || '').toString().toLowerCase();
+                let valB = (b[field] || '').toString().toLowerCase();
+                if (valA < valB) return window.ftSortDir === 'asc' ? -1 : 1;
+                if (valA > valB) return window.ftSortDir === 'asc' ? 1 : -1;
+                return 0;
+            });
+
+            // Update sort indicators
+            ['key','summary','status','assignee','priority','story_points','age'].forEach(f => {
+                const el = document.getElementById('ft-sort-' + f);
+                if (el) el.textContent = '';
+            });
+            const sortEl = document.getElementById('ft-sort-' + field);
+            if (sortEl) sortEl.textContent = window.ftSortDir === 'asc' ? '▲' : '▼';
+
+            window.ftPage = 1;
+            renderFtPage();
         }
 
         // Sprint view toggle
@@ -1926,7 +2113,7 @@ P - Print summary view
                     <td class="truncate" title="${issue.summary}">${issue.summary}</td>
                     <td>${issue.type}</td>
                     <td><span class="status-badge status-${statusClass}">${issue.status}</span></td>
-                    <td>${issue.resolved || '-'}</td>
+                    <td style="text-align:center;">${issue.story_points || 2}</td>
                 </tr>`;
             }).join('');
 
@@ -2230,7 +2417,7 @@ P - Print summary view
             renderTicketsPage();
         }
 
-        loadDashboard();
+        loadDashboard(true);  // Skip JIRA refresh on page load - use cached data
         // Auto-refresh every 5 minutes (skip JIRA refresh, just reload cached data)
         setInterval(() => loadDashboard(true), 300000);
     </script>
