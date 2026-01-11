@@ -610,7 +610,7 @@ def main():
             'timeline': 'https://getnexar.atlassian.net/jira/software/c/projects/FS/boards/268/timeline?statuses=2%2C4&timeline=MONTHS',
             'releases_page': 'https://getnexar.atlassian.net/projects/FS?selectedItem=com.atlassian.jira.jira-projects-plugin%3Arelease-page&status=no-filter',
             'release_plan': 'https://getnexar.atlassian.net/wiki/spaces/EMB/pages/4832722963',
-            'release_confluence': 'https://getnexar.atlassian.net/wiki/x/A4CoNQE',
+            'release_confluence': 'https://getnexar.atlassian.net/wiki/spaces/EMB/pages/5195202563',
             'jira_board': 'https://getnexar.atlassian.net/jira/software/c/projects/FS/boards/268/backlog',
             'chicony_jira': 'https://nexar-chicony.atlassian.net/jira/core/projects/B4/board?filter=&groupBy=status',
             'dastic_jira': 'https://nexar-chicony.atlassian.net/jira/core/projects/DAS/board?filter=&groupBy=status',
